@@ -1,0 +1,9 @@
+C:\Users\Anthony\source\repos\DotnetLogo\NParser\bin\Debug\netstandard2.0\NParser.deps.json
+C:\Users\Anthony\source\repos\DotnetLogo\NParser\bin\Debug\netstandard2.0\NParser.dll
+C:\Users\Anthony\source\repos\DotnetLogo\NParser\bin\Debug\netstandard2.0\NParser.pdb
+C:\Users\Anthony\source\repos\DotnetLogo\NParser\obj\Debug\netstandard2.0\NParser.csprojResolveAssemblyReference.cache
+C:\Users\Anthony\source\repos\DotnetLogo\NParser\obj\Debug\netstandard2.0\NParser.csproj.CoreCompileInputs.cache
+C:\Users\Anthony\source\repos\DotnetLogo\NParser\obj\Debug\netstandard2.0\NParser.AssemblyInfoInputs.cache
+C:\Users\Anthony\source\repos\DotnetLogo\NParser\obj\Debug\netstandard2.0\NParser.AssemblyInfo.cs
+C:\Users\Anthony\source\repos\DotnetLogo\NParser\obj\Debug\netstandard2.0\NParser.dll
+C:\Users\Anthony\source\repos\DotnetLogo\NParser\obj\Debug\netstandard2.0\NParser.pdb

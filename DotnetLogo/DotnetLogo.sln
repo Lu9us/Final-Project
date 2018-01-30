@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2005
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotnetLogo", "DotnetLogo\DotnetLogo.csproj", "{3D0EE8FA-2600-4750-A6F7-D60318693108}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NParser", "NParser\NParser.csproj", "{2A6BBE6D-101B-4A8B-BAEB-880125BD9485}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3D0EE8FA-2600-4750-A6F7-D60318693108}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D0EE8FA-2600-4750-A6F7-D60318693108}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D0EE8FA-2600-4750-A6F7-D60318693108}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D0EE8FA-2600-4750-A6F7-D60318693108}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A6BBE6D-101B-4A8B-BAEB-880125BD9485}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A6BBE6D-101B-4A8B-BAEB-880125BD9485}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A6BBE6D-101B-4A8B-BAEB-880125BD9485}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A6BBE6D-101B-4A8B-BAEB-880125BD9485}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {72E2FEC5-9B97-4666-BC60-4EE9F17F3EC1}
+	EndGlobalSection
+EndGlobal
