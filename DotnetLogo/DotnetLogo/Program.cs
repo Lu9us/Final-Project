@@ -16,7 +16,7 @@ namespace DotnetLogo
             p.LoadFile("Testing\\Test.nlogo");
             while (!p.fileEnd)
             {
-                p.Read();
+                p.FirstPassRead();
             }
         }
     }

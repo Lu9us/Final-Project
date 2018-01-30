@@ -4,7 +4,8 @@ to setup
   clear-all
   create-turtles num-bees
     [ setxy random-xcor random-ycor
-      set color yellow - 3 + random 7 ]  ;; varying the color makes the bees easier to follow with your eyes
+      set color yellow - 3 + random 7 ]  
+	  ;; varying the color makes the bees easier to follow with your eyes
   ask patches [ set chemical 0 ]
   reset-ticks
 end

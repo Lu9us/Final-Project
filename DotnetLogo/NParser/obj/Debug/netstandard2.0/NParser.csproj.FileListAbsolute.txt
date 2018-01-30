@@ -7,3 +7,12 @@ C:\Users\Anthony\source\repos\DotnetLogo\NParser\obj\Debug\netstandard2.0\NParse
 C:\Users\Anthony\source\repos\DotnetLogo\NParser\obj\Debug\netstandard2.0\NParser.AssemblyInfo.cs
 C:\Users\Anthony\source\repos\DotnetLogo\NParser\obj\Debug\netstandard2.0\NParser.dll
 C:\Users\Anthony\source\repos\DotnetLogo\NParser\obj\Debug\netstandard2.0\NParser.pdb
+C:\Users\Wolfy\Documents\GitHub\Final-Project\DotnetLogo\NParser\bin\Debug\netstandard2.0\NParser.deps.json
+C:\Users\Wolfy\Documents\GitHub\Final-Project\DotnetLogo\NParser\bin\Debug\netstandard2.0\NParser.dll
+C:\Users\Wolfy\Documents\GitHub\Final-Project\DotnetLogo\NParser\bin\Debug\netstandard2.0\NParser.pdb
+C:\Users\Wolfy\Documents\GitHub\Final-Project\DotnetLogo\NParser\obj\Debug\netstandard2.0\NParser.csprojResolveAssemblyReference.cache
+C:\Users\Wolfy\Documents\GitHub\Final-Project\DotnetLogo\NParser\obj\Debug\netstandard2.0\NParser.csproj.CoreCompileInputs.cache
+C:\Users\Wolfy\Documents\GitHub\Final-Project\DotnetLogo\NParser\obj\Debug\netstandard2.0\NParser.AssemblyInfoInputs.cache
+C:\Users\Wolfy\Documents\GitHub\Final-Project\DotnetLogo\NParser\obj\Debug\netstandard2.0\NParser.AssemblyInfo.cs
+C:\Users\Wolfy\Documents\GitHub\Final-Project\DotnetLogo\NParser\obj\Debug\netstandard2.0\NParser.dll
+C:\Users\Wolfy\Documents\GitHub\Final-Project\DotnetLogo\NParser\obj\Debug\netstandard2.0\NParser.pdb

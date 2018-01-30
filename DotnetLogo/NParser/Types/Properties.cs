@@ -4,21 +4,21 @@ using System.Text;
 
 namespace NParser.Types
 {
-  public abstract class AgentProperties
+  public  class AgentProperties
     {
-        protected delegate NetLogoObject OnPropertyChange(NetLogoObject newVal);
+        internal delegate NetLogoObject OnPropertyChange(NetLogoObject newVal);
 
-        protected AgentProperties()
+        internal AgentProperties()
         {
             properties = new Dictionary<string, NetLogoObject>();
             protectedType = new Dictionary<string, Type>();
             protectedValue = new List<string>();
             Events = new Dictionary<string, OnPropertyChange>();
         }
-        protected Dictionary<string, NetLogoObject> properties { get; set; }
-        protected Dictionary<string, Type> protectedType { get; set; }
-        protected List<string> protectedValue { get; set; }
-        protected Dictionary<string, OnPropertyChange> Events { get; set; }
+        internal Dictionary<string, NetLogoObject> properties { get; set; }
+        internal Dictionary<string, Type> protectedType { get; set; }
+        internal List<string> protectedValue { get; set; }
+        internal Dictionary<string, OnPropertyChange> Events { get; set; }
         public object GetProperty(string name)
         {
             try

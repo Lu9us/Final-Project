@@ -4,7 +4,7 @@ using System.Text;
 
 namespace NParser.Types
 {
-   public  interface NetLogoObject
+   public  class NetLogoObject
     {
   
 
