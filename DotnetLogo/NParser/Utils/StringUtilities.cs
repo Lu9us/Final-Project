@@ -7,6 +7,12 @@ namespace NParser.Utils
 {
    public static class StringUtilities
     {
+        /// <summary>
+        /// functionally simlar to string.split however it keeps the delimiters in the string
+        /// </summary>
+        /// <param name="delims"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public static string[] split(char[] delims, string data)
         {
             List<string> split = new List<string>();
@@ -14,7 +20,7 @@ namespace NParser.Utils
            
             int i = 0;
 
-            while(true)
+            while(i<workingString.Length)
             {
                 if (delims.Contains(workingString[i]))
                 {
@@ -47,6 +53,10 @@ namespace NParser.Utils
                 {
                     i++;
                 }  
+            }
+            if (workingString.Length > 0)
+            {
+                split.Add(workingString);
             }
 
             return split.ToArray();

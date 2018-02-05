@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace NParser
+namespace NParser.Runtime
 {
    public class SystemState
     {
@@ -20,13 +20,17 @@ namespace NParser
                 }
 
             }
-
+     
 
         }
 
         public Patch[,] patches;
-
+        private Dictionary<string,Function> registeredFunctions = new Dictionary<string, Function>();
        
+        public void AddFunction(Function function)
+        {
+            registeredFunctions.Add(function.name, function);
+        }
 
 
     }

@@ -1,4 +1,5 @@
-﻿using NParser.Types;
+﻿using NParser.Runtime;
+using NParser.Types;
 using NParser.Types.Agents;
 using NParser.Utils;
 using System;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using static NParser.Runtime.FlowControll;
 
 namespace NParser
 {
@@ -20,7 +22,8 @@ namespace NParser
         string[] declarativeKeywords = { "extensions", "breed", "globals" };
         string[] agentDeclarativeKeywords = { "-own" };
         string[] functionDeclarativeKeywords = { "to" };
-        string[] flowControllKeywords = { "if" };
+        string[] flowControllKeywords = { "if","elseif"};
+          char[] delims = new[] { ' ', '[', ']', ',' };
         public void LoadFile(string fileName)
         {
             data = File.ReadAllLines(fileName);
@@ -63,20 +66,20 @@ namespace NParser
                         FunctionDeclarative(line);
 
                     }
-                    else if (flowControllKeywords.Any(a => FirstStatment.Contains(a)))
-                    {
-                        Console.WriteLine("Controll flow statment");
-                        FlowControl(line);
-                    }
+                 
                     PC++;
                 }
                 catch (RTException e)
                 {
-                    Console.WriteLine("Parsing failed Exception Details: " + e.ToString());
-#if DEBUG
-                    Debugger.Break();
-#endif
 
+
+                    Console.WriteLine("Parsing failed Exception Details: " + e.ToString());
+                    if (!skipBadLines)
+                    { 
+#if DEBUG
+                        Debugger.Break();
+#endif
+                    }
                 }
             }
             else if (PC >= data.Length)
@@ -136,15 +139,135 @@ namespace NParser
 
         public void Declarative(string line)
         {
-
+          
+              
         }
+
         public void FunctionDeclarative(string line)
         {
+            int tempPC = PC + 1;
+         
+            string token = "";
+            try
+            {
+                string[] lineData = StringUtilities.split(delims, this.data[PC]);
+                List<FlowControll> fc = new List<FlowControll>();
+                string name = lineData[2];
+                while (token != "end")
+                {
+                    foreach (string td in lineData)
+                    {
+
+                        if (flowControllKeywords.Any(a => td.Equals(a)))
+                        {
+                          fc.Add(FlowControl(tempPC-1, this.data[tempPC-1]));
+                        }
+                    }
+                    lineData = StringUtilities.split(delims, this.data[tempPC]);
+                    foreach (string s in lineData)
+                    {
+                        if (s == "end")
+                        {
+                            token = s;
+                            break;
+                        }
+                    }
+                    tempPC++;
+
+                }
+                string[] lines = new string[tempPC-1 - (PC+1)];
+                for (int i = PC+1; i < tempPC-1; i++)
+                {
+                    lines[i - (PC+1)] = this.data[i];
+                }
+
+                Function f = new Function(lines, PC + 1, name);
+                f.flowControls = fc;
+                s.AddFunction(f);
+            }
+            catch (Exception e)
+            { throw new RTException("Function parsing failed"); }
+
 
         }
-        public void FlowControl(string line)
-        {
 
+        public FlowControll FlowControl(int pc,string line)
+        {
+            line = line.Trim();
+            string type = line.Substring(0,line.IndexOf(' '));
+            string fullLine = line.Split(new[] { '\n','['})[0];
+
+            Stack<string> expected = new Stack<string>();
+
+            string[] splitTokens;
+            string tempLine;
+
+            expected.Push("[");
+
+            JumpType jump = JumpType.Succes;
+
+            FlowControll f = new FlowControll(type);
+
+            int blockStart = 0;
+            int blockEnd = 0;
+            
+            while (expected.Count > 0)
+            {
+                if (expected.Count > 0 && pc >= data.Length)
+                {
+                    throw new RTException("Expected " + expected.Peek() + "got eof");
+                }
+
+                tempLine = data[pc];
+                splitTokens = StringUtilities.split(delims,tempLine);
+                
+                foreach (string token in splitTokens)
+                {
+                    if (!string.IsNullOrWhiteSpace(token))
+                    {
+                        if (token == "[" && expected.Peek() == "[" && expected.Count == 1)
+                        {
+                            expected.Pop();
+                            expected.Push("]");
+                            blockStart = pc;
+
+                        }
+                        else if (token == "[" && expected.Count > 1)
+                        {
+                            expected.Push("]");
+                        }
+               
+
+                        if (token == "]" && expected.Peek() == "]" && expected.Count == 1)
+                        {
+                            blockEnd = pc;
+                            expected.Pop();
+                            if (type == "ifelse" && jump == JumpType.Succes)
+                            {
+                                expected.Push("[");
+                                jump = JumpType.Fail;
+
+                            }
+                            Block b = new Block();
+                            b.start = blockStart;
+                            b.end = blockEnd;
+                            f.JumpTable.Add(jump, b);
+                            f.conditionalLine = fullLine;
+                            break;
+
+                        }
+                        else if (token == "]" && expected.Peek() == "]" && expected.Count > 1)
+                        {
+                            expected.Pop();
+                        }
+                    }
+
+                }
+                pc++;
+              
+            }
+
+            return f;
 
         }
     }
