@@ -1,4 +1,5 @@
 ﻿using NParser;
+using NParser.Runtime.DataStructs;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,11 +13,26 @@ namespace DotnetLogo
     {
         static void Main(string[] args)
         {
-            Parser p = new Parser();
-            p.LoadFile("Testing\\Test.nlogo");
-            while (!p.fileEnd)
+            string s = "";
+            while (s != "exit")
             {
-                p.FirstPassRead();
+                Console.Write("$: ");
+                s = Console.ReadLine();
+
+                if (s.ToLower() == "test")
+                {
+                    Parser p = new Parser();
+                    p.LoadFile("Testing\\Test.nlogo");
+                    while (!p.fileEnd)
+                    {
+                        p.FirstPassRead();
+                    }
+                }
+                else if (s.Contains( "treeGen "))
+                {
+                    string line = s.Substring(s.IndexOf(" ")+1);
+                    ParseTree p = new ParseTree(line);
+                }
             }
         }
     }
