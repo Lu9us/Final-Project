@@ -4,7 +4,7 @@ using System.Text;
 
 namespace NParser.Types
 {
-   public class NSString
+   public class NSString:NetLogoObject
     {
         public string val = "";
     }

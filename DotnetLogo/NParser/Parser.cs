@@ -14,7 +14,9 @@ namespace NParser
     //TODO: parse post line comments 
     public class Parser
     {
-        SystemState s = new SystemState();
+
+
+        SystemState s;
         int PC = 0;
         public bool fileEnd = false;
         string[] data;
@@ -24,6 +26,12 @@ namespace NParser
         string[] functionDeclarativeKeywords = { "to" };
         string[] flowControllKeywords = { "if","elseif"};
           char[] delims = new[] { ' ', '[', ']', ',' };
+
+
+        public Parser(SystemState st)
+        {
+            s = st;
+        }
         public void LoadFile(string fileName)
         {
             data = File.ReadAllLines(fileName);

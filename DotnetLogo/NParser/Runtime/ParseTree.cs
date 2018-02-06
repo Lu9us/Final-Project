@@ -20,8 +20,8 @@ namespace NParser.Runtime.DataStructs
     public class ParseTree
     {
         char[] delims = new[] { ' ', '[', ']', ',' };
-        string[] operators = new[] { "(","^", "/", "*","+", "-",")","set","let","ask" };
-        TreeNode root;
+        string[] operators = new[] { "(","^", "/", "*","+", "-",")","set","let","ask","report" };
+        public readonly TreeNode root;
       public  ParseTree(string expression)
        {
             root = new TreeNode(expression);
@@ -29,6 +29,8 @@ namespace NParser.Runtime.DataStructs
 
             Stack<string> tokenStack = new Stack<string>();
             Stack<string> opearatorStack = new Stack<string>();
+
+          
 
             foreach (string data in tokens.Reverse())
             {
@@ -51,7 +53,11 @@ namespace NParser.Runtime.DataStructs
 
                 }
             }
-         this.root.left = NodeGen( tokenStack, opearatorStack,this.root);
+            if (tokenStack.Count == 0 && opearatorStack.Count == 0)
+            {
+                return;
+            }
+            this.root.left = NodeGen( tokenStack, opearatorStack,this.root);
 
         }
 
@@ -70,12 +76,37 @@ namespace NParser.Runtime.DataStructs
             else if (tokenStack.Count > 0)
             {
                 tempNode.right = new TreeNode(tokenStack.Pop()); ;
-                tempNode.right.parent = root;
+                tempNode.right.parent = tempNode;
             }
            
             return tempNode;
             
         }
-      
+
+        public bool IsOperator(TreeNode n)
+        {
+            return operators.Contains(n.data);
+        }
+
+        public  void printTree(TreeNode n, int level, int x)
+        {
+            Console.WriteLine(new string(' ', 40 - x - level) + n.data);
+            level++;
+            if (n.left != null)
+            {
+                printTree(n.left, level, 10);
+            }
+            if (n.right != null)
+            {
+                printTree(n.right, level, 5);
+            }
+
+            if (n.right == null && n.left == null)
+            {
+                return;
+            }
+        }
     }
+
 }
+

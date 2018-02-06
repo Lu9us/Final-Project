@@ -1,4 +1,5 @@
-﻿using NParser.Types.Agents;
+﻿using NParser.Types;
+using NParser.Types.Agents;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -20,18 +21,20 @@ namespace NParser.Runtime
                 }
 
             }
-     
 
+           
         }
 
+        
         public Patch[,] patches;
-        private Dictionary<string,Function> registeredFunctions = new Dictionary<string, Function>();
-       
+        internal Dictionary<string,Function> registeredFunctions = new Dictionary<string, Function>();
+        internal Stack<StackFrame> exeStack = new Stack<StackFrame>();
+        internal Dictionary<string, NetLogoObject> globals = new Dictionary<string, NetLogoObject>();
         public void AddFunction(Function function)
         {
             registeredFunctions.Add(function.name, function);
         }
 
-
+     
     }
 }
