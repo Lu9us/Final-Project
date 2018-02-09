@@ -27,6 +27,13 @@ to go
   tick
 end
 
+to testf 
+let x 10 
+let y 20
+let z x + y 
+show z
+end 
+
 
 ; Copyright 2003 Uri Wilensky.
 ; See Info tab for full copyright and license.

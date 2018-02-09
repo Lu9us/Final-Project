@@ -7,5 +7,6 @@ namespace NParser.Types
    public class NSString:NetLogoObject
     {
         public string val = "";
+        public override object value { get { return val; } set { } }
     }
 }

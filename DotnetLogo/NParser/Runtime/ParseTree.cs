@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using NParser.Types.Internals;
 
 namespace NParser.Runtime.DataStructs
 {
@@ -20,7 +21,7 @@ namespace NParser.Runtime.DataStructs
     public class ParseTree
     {
         char[] delims = new[] { ' ', '[', ']', ',' };
-        string[] operators = new[] { "(","^", "/", "*","+", "-",")","set","let","ask","report" };
+        string[] operators = OperatorTable.opTable.Select(o => o.Key.token).ToArray();
         public readonly TreeNode root;
       public  ParseTree(string expression)
        {
@@ -57,6 +58,7 @@ namespace NParser.Runtime.DataStructs
             {
                 return;
             }
+
             this.root.left = NodeGen( tokenStack, opearatorStack,this.root);
 
         }
@@ -64,23 +66,58 @@ namespace NParser.Runtime.DataStructs
 
         private TreeNode NodeGen( Stack<string> tokenStack, Stack<string> opearatorStack,TreeNode parent)
         {
-          
-          TreeNode tempNode =new TreeNode(opearatorStack.Pop());
-            tempNode.parent = parent;
-            tempNode.left = new TreeNode(tokenStack.Pop());
-            tempNode.left.parent = tempNode;
+            TreeNode tempNode = null;
             if (opearatorStack.Count > 0)
             {
-                tempNode.right =NodeGen(tokenStack, opearatorStack, tempNode);
+                tempNode = new TreeNode(opearatorStack.Pop());
+                tempNode.parent = parent;
+                tempNode.left = new TreeNode(tokenStack.Pop());
+                tempNode.left.parent = tempNode;
+            }
+            else if (tokenStack.Count > 0)
+            {
+                tempNode = new TreeNode(tokenStack.Pop());
+                tempNode.parent = parent;
+                if (tokenStack.Count > 0)
+                {
+                    tempNode.left = new TreeNode(tokenStack.Pop());
+                    tempNode.left.parent = tempNode;
+                }
+            
+            }
+            if (opearatorStack.Count > 0)
+            {
+                tempNode.right = NodeGen(tokenStack, opearatorStack, tempNode);
+            }
+            else if (tokenStack.Count > 0 && opearatorStack.Count == 0)
+            {
+                tempNode.right = TokenNodeGen(tokenStack, tempNode);
             }
             else if (tokenStack.Count > 0)
             {
                 tempNode.right = new TreeNode(tokenStack.Pop()); ;
                 tempNode.right.parent = tempNode;
             }
+          
            
             return tempNode;
             
+        }
+
+        private TreeNode TokenNodeGen(Stack<string> tokenStack, TreeNode parent)
+        {
+            TreeNode tempNode = new TreeNode(tokenStack.Pop());
+            tempNode.parent = parent;
+            if (tokenStack.Count > 0)
+            {
+                tempNode.left = TokenNodeGen(tokenStack, tempNode);
+            }
+            if (tokenStack.Count > 0)
+            {
+                tempNode.right = TokenNodeGen(tokenStack, tempNode);
+            }
+
+            return tempNode;
         }
 
         public bool IsOperator(TreeNode n)

@@ -27,10 +27,10 @@ namespace DotnetLogo
                     engine.Load("Testing/Test.nlogo");
 
                 }
-                else if (s.Contains("treeGen "))
+                else
                 {
-                    string line = s.Substring(s.IndexOf(" ") + 1);
-                    ParseTree p = new ParseTree(line);
+                  
+                    ParseTree p = new ParseTree(s);
                     engine.ExecuteTree(p);
 
 

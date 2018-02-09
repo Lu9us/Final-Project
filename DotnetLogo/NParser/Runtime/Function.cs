@@ -8,7 +8,7 @@ namespace NParser.Runtime
    public class Function
     {
 
-        int pcOffset;
+        internal int pcOffset;
         internal string[] body;
         public  string name;
         public bool Report;
