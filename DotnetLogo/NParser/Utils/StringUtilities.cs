@@ -5,7 +5,7 @@ using System.Text;
 
 namespace NParser.Utils
 {
-   public static class StringUtilities
+    public static class StringUtilities
     {
         /// <summary>
         /// functionally simlar to string.split however it keeps the delimiters in the string
@@ -17,10 +17,10 @@ namespace NParser.Utils
         {
             List<string> split = new List<string>();
             string workingString = new string(data.ToCharArray());
-           
+
             int i = 0;
 
-            while(i<workingString.Length)
+            while (i < workingString.Length)
             {
                 if (delims.Contains(workingString[i]))
                 {
@@ -28,7 +28,7 @@ namespace NParser.Utils
 
                     if (!string.IsNullOrEmpty(workingString.Substring(0, i)))
                     {
-                        split.Add(workingString.Substring(0, i));  
+                        split.Add(workingString.Substring(0, i));
                     }
                     string s = "";
                     s += workingString[i];
@@ -52,13 +52,15 @@ namespace NParser.Utils
                 else
                 {
                     i++;
-                }  
+                }
             }
             if (workingString.Length > 0)
             {
                 split.Add(workingString);
             }
 
+
+            split.RemoveAll(a => string.IsNullOrWhiteSpace(a));
             return split.ToArray();
         }
 

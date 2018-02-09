@@ -10,12 +10,12 @@ namespace NParser.Runtime
     public class ExecutionEngine
     {
         public SystemState sys = new SystemState();
-        public Parser p;
+        public PreProcessor p;
 
         public ExecutionEngine()
         {
 
-            p = new Parser(sys);
+            p = new PreProcessor(sys);
             StackFrame t = new StackFrame("INT", new Dictionary<string, NetLogoObject>());
             sys.exeStack.Push(t);
         }
@@ -83,7 +83,13 @@ namespace NParser.Runtime
         {
             Function f = sys.registeredFunctions[n.data];
 
-            StackFrame fFrame = new StackFrame(f.name, new Dictionary<string, NetLogoObject>());
+            List<NetLogoObject> vals = GetParams(n, f.name);
+            Dictionary<string, NetLogoObject> objects = new Dictionary<string, NetLogoObject>();
+            for (int i = 0; i < f.paramaters.Count; i++)
+            {
+                objects.Add(f.paramaters[i], vals[i]);
+            }
+            StackFrame fFrame = new StackFrame(f.name, objects);
 
             fFrame.pc = 0;
             sys.exeStack.Push(fFrame);
@@ -91,6 +97,9 @@ namespace NParser.Runtime
             while (fFrame.pc < f.body.Length)
             {
                 pt = new ParseTree(f.body[fFrame.pc]);
+                
+
+
                 ExecuteTree(pt);
                fFrame.pc++;
             }

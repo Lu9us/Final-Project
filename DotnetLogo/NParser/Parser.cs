@@ -12,7 +12,7 @@ using static NParser.Runtime.FlowControll;
 namespace NParser
 {
     //TODO: parse post line comments 
-    public class Parser
+    public class PreProcessor
     {
 
 
@@ -28,7 +28,7 @@ namespace NParser
           char[] delims = new[] { ' ', '[', ']', ',' };
 
 
-        public Parser(SystemState st)
+        public PreProcessor(SystemState st)
         {
             s = st;
         }
@@ -160,12 +160,24 @@ namespace NParser
             {
                 string[] lineData = StringUtilities.split(delims, this.data[PC]);
                 List<FlowControll> fc = new List<FlowControll>();
-                string name = lineData[2];
+                List<string> paramaters = new List<string>();
+                bool param = false;
+                string name = lineData[1];
                 while (token != "end")
                 {
                     foreach (string td in lineData)
                     {
 
+                        if (td == "[" && lineData[1] == name)
+                        {
+                            param = true;
+                        }
+                        if (td == "]")
+                        {
+                            param = false;
+                        }
+                        if (param && !(td == "[" || td== "]")&& !string.IsNullOrEmpty(td))
+                        { paramaters.Add(td); }
                         if (flowControllKeywords.Any(a => td.Equals(a)))
                         {
                           fc.Add(FlowControl(tempPC-1, this.data[tempPC-1]));
@@ -181,15 +193,17 @@ namespace NParser
                         }
                     }
                     tempPC++;
+                    token = this.data[tempPC];
 
                 }
-                string[] lines = new string[tempPC-1 - (PC+1)];
-                for (int i = PC+1; i < tempPC-1; i++)
+                string[] lines = new string[tempPC - (PC+1)];
+                for (int i = PC+1; i < tempPC; i++)
                 {
                     lines[i - (PC+1)] = this.data[i];
+                   
                 }
-
-                Function f = new Function(lines, PC + 1, name);
+                
+                Function f = new Function(lines, PC + 1, name) {paramaters = paramaters };
                 f.flowControls = fc;
                 s.AddFunction(f);
             }

@@ -84,7 +84,11 @@ namespace NParser.Runtime
 
         public NetLogoObject Get(string s)
         {
-            if (exeStack.Peek().locals.ContainsKey(s))
+            if (exeStack.Peek().param.ContainsKey(s))
+            {
+                return exeStack.Peek().param[s];
+            }
+            else if (exeStack.Peek().locals.ContainsKey(s))
             {
                 return exeStack.Peek().locals[s];
             }
