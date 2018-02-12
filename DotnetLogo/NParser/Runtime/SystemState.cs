@@ -79,7 +79,11 @@ namespace NParser.Runtime
             {
                 return ((NSString)o).val;
             }
-            return null;
+            else
+            {
+                //DIRTY HACK TO GET REFRENCES !!
+                return Assign(o.value.ToString()).value.ToString(); ;
+            }
         }
 
         public NetLogoObject Get(string s)

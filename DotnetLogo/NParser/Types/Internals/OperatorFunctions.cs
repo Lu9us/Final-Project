@@ -10,9 +10,9 @@ namespace NParser.Types.Internals
         private static SystemState sys = SystemState.internalState;
         public static NetLogoObject let(NetLogoObject o, NetLogoObject n)
         {
-            var v = sys.Assign(n.value.ToString());
-            sys.exeStack.Peek().locals.Add((string)o.value, v);
-            return new NetLogoObject() { value = o.ptrID };
+          //  var v = sys.Assign(n.value.ToString());
+            sys.exeStack.Peek().locals.Add((string)o.value, n);
+            return new NetLogoObject() { ptrID = o.ptrID };
         }
         public static NetLogoObject report(NetLogoObject o, NetLogoObject d)
         {

@@ -57,7 +57,7 @@ namespace NParser.Runtime
                 }
                 catch (Exception e)
                 {
-                    // GetVar(n);
+                    //throw new RTException("Exception occured during execution: " + e.Message);
                 }
 
 
