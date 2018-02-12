@@ -9,6 +9,7 @@ namespace NParser.Runtime
    public class SystemState
     {
         internal static SystemState internalState;
+        public bool BreakExecution = false;
         public SystemState()
         {
             patches = new Patch[50,50];

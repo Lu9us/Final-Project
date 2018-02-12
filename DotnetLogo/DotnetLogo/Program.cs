@@ -21,10 +21,10 @@ namespace DotnetLogo
                 Console.Write("$: ");
                 s = Console.ReadLine();
 
-                if (s.ToLower() == "test")
+                if (s.Contains(" ")&& s.ToLower().Substring(0,s.IndexOf(" ")) == "load")
                 {
 
-                    engine.Load("Testing/Test.nlogo");
+                    engine.Load(s.Substring(s.IndexOf(" ")+1));
 
                 }
                 else

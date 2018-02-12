@@ -11,7 +11,7 @@ namespace NParser.Runtime
     {
         public SystemState sys = new SystemState();
         public PreProcessor p;
-
+      
         public ExecutionEngine()
         {
 
@@ -49,7 +49,7 @@ namespace NParser.Runtime
                 ExecOp(n);
 
             }
-            else if (sys.checkType(n.data) == typeof(NetLogoObject))
+            else if (sys.checkType(n.data) == typeof(NetLogoObject)&& sys.registeredFunctions.ContainsKey(n.data))
             {
                 try
                 {
@@ -83,18 +83,33 @@ namespace NParser.Runtime
         {
             Function f = sys.registeredFunctions[n.data];
 
+            if (sys.registeredFunctions.ContainsKey(n.left.data) && n.right != null)
+            {
+                TreeNode ns = ReadToLeaf(n.left);
+                ns.left = new TreeNode(n.right.data);
+                ns.left.parent = ns;
+                n.right = null;
+                ExecFunction(n.left);
+
+            }
+            else if (sys.registeredFunctions.ContainsKey(n.left.data))
+            {
+                ExecFunction(n.left);
+            }
+            sys.BreakExecution = false;
             List<NetLogoObject> vals = GetParams(n, f.name);
+            
             Dictionary<string, NetLogoObject> objects = new Dictionary<string, NetLogoObject>();
             for (int i = 0; i < f.paramaters.Count; i++)
             {
                 objects.Add(f.paramaters[i], vals[i]);
             }
-            StackFrame fFrame = new StackFrame(f.name, objects);
+            StackFrame fFrame = new StackFrame(f.name, objects) { Report = f.Report };
 
             fFrame.pc = 0;
             sys.exeStack.Push(fFrame);
             ParseTree pt;
-            while (fFrame.pc < f.body.Length)
+            while (fFrame.pc < f.body.Length && !sys.BreakExecution)
             {
                 pt = new ParseTree(f.body[fFrame.pc]);
                 
@@ -103,6 +118,27 @@ namespace NParser.Runtime
                 ExecuteTree(pt);
                fFrame.pc++;
             }
+#if DEBUG 
+            Console.WriteLine("Execution broken : "+ sys.BreakExecution);
+#endif 
+
+            if (f.Report && sys.exeStack.Peek().ReportValue != null)
+            {
+                sys.BreakExecution = false;
+                TreeNode tempNode = new TreeNode(sys.Assign(sys.exeStack.Peek().ReportValue.value.ToString()).value.ToString());
+                if (n.parent.left == n)
+                {
+                    n.parent.left = tempNode;
+                }
+                else if (n.parent.right == n)
+                {
+                    n.parent.right = tempNode;
+                }
+                tempNode.parent = n.parent;
+
+            }
+
+
           StackFrame oldFrame = sys.exeStack.Pop();
 #if DEBUG
          Console.WriteLine(oldFrame.ToString());
@@ -111,6 +147,9 @@ namespace NParser.Runtime
         private List<NetLogoObject> GetParams(TreeNode n,string functionName)
         {
             List<NetLogoObject> paramList = new List<NetLogoObject>();
+            
+            
+
 
             if (n.data != functionName)
             {
@@ -119,7 +158,11 @@ namespace NParser.Runtime
 
             if (n.left != null)
             {
-                paramList.AddRange(GetParams(n.left,functionName));
+                paramList.AddRange(GetParams(n.left, functionName));
+            }
+            else if (n.left == null && functionName == n.data)
+            {
+                paramList.Add(sys.Assign(n.parent.right.data));
             }
             if (n.right != null)
             {
@@ -169,50 +212,6 @@ namespace NParser.Runtime
             }
             tempNode.parent = n.parent;
 
-            //switch (n.data)
-            //{
-            //    case "+":
-            //        _add(n);
-            //        break;
-            //    case "let":
-            //        if (nodeFull(n))
-            //        {
-            //            if (sys.checkType(n.left.data) == typeof(NetLogoObject))
-            //            {
-            //                sys.exeStack.Peek().locals.Add(n.left.data, sys.Assign(n.right.data));
-
-            //            }
-            //        }
-            //        break;
-            //    case "set":
-            //        if (nodeFull(n))
-            //        {
-            //            if (sys.checkType(n.left.data) == typeof(NetLogoObject))
-            //            {
-            //                sys.exeStack.Peek().locals[n.left.data]= sys.Assign(n.right.data);
-
-            //            }
-            //        }
-            //        break;
-            //    case "report":
-            //        if (n.left != null)
-            //        {
-            //            if (sys.checkType(n.left.data) == typeof(NetLogoObject))
-            //            {
-            //                Console.WriteLine(sys.GetVal(sys.Get(n.left.data)));
-            //            }
-            //            else
-            //            {
-            //                Console.WriteLine(n.left.data);
-            //            }
-
-            //        }
-            //        break;
-            //    default:
-            //        break;
-
-            //}
-
         }
 
 
@@ -240,56 +239,6 @@ namespace NParser.Runtime
 
         }
 
-        private void _add(TreeNode n)
-        {
-            if (nodeFull(n))
-            {
-                if (sys.checkType(n.left.data) == typeof(Number) && sys.checkType(n.right.data) == typeof(Number))
-                {
-
-
-                    __add(float.Parse(n.left.data), float.Parse(n.right.data),n) ;
-
-                   
-                   
-                }
-                else if (sys.checkType(n.left.data) == typeof(NetLogoObject) && sys.checkType(n.right.data) == typeof(NetLogoObject))
-                {
-                    NetLogoObject o1 = (sys.Get(n.left.data));
-                    NetLogoObject o2 = (sys.Get(n.right.data));
-                    if (o1 is Number && o2 is Number)
-                    {
-                        __add(((Number)o1).val, ((Number)o2).val, n);
-                    }
-                }
-                else if (sys.checkType(n.left.data) == typeof(Number) && sys.checkType(n.right.data) == typeof(NetLogoObject))
-                {
-
-                }
-                else if (sys.checkType(n.left.data) == typeof(NetLogoObject) && sys.checkType(n.right.data) == typeof(Number))
-                {
-
-                }
-            }
-
-
-        }
-        private void __add(float a, float b,TreeNode n)
-        {
-            float result = a + b;
-
-            TreeNode temp = n.parent;
-            TreeNode node = new TreeNode(result.ToString());
-            if (n.parent.left == n)
-            {
-                n.parent.left = node;
-            }
-            else if (n.parent.right == n)
-            {
-                n.parent.right = node;
-            }
-            node.parent = n.parent;
-        }
 
     }
 

@@ -161,8 +161,13 @@ namespace NParser
                 string[] lineData = StringUtilities.split(delims, this.data[PC]);
                 List<FlowControll> fc = new List<FlowControll>();
                 List<string> paramaters = new List<string>();
+                bool report = false;
                 bool param = false;
                 string name = lineData[1];
+                if (lineData[0] == "to-report")
+                {
+                    report = true;
+                }
                 while (token != "end")
                 {
                     foreach (string td in lineData)
@@ -193,7 +198,7 @@ namespace NParser
                         }
                     }
                     tempPC++;
-                    token = this.data[tempPC];
+                    //token = this.data[tempPC];
 
                 }
                 string[] lines = new string[tempPC - (PC+1)];
@@ -202,13 +207,13 @@ namespace NParser
                     lines[i - (PC+1)] = this.data[i];
                    
                 }
-                
-                Function f = new Function(lines, PC + 1, name) {paramaters = paramaters };
+
+                Function f = new Function(lines, PC + 1, name) { paramaters = paramaters, Report = report };
                 f.flowControls = fc;
                 s.AddFunction(f);
             }
             catch (Exception e)
-            { throw new RTException("Function parsing failed"); }
+            { throw new RTException("Function parsing failed on line "+ PC + " with exception "+ e.Message); }
 
 
         }

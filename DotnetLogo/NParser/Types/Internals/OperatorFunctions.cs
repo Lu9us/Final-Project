@@ -17,7 +17,8 @@ namespace NParser.Types.Internals
         public static NetLogoObject report(NetLogoObject o, NetLogoObject d)
         {
             sys.exeStack.Peek().ReportValue = o;
-            return new NetLogoObject() {ptrID = "NULLPTR" };
+            sys.BreakExecution = true;
+            return new NetLogoObject() { ptrID = o.value.ToString() };
 
         }
         public static NetLogoObject show(NetLogoObject o, NetLogoObject d)

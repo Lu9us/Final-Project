@@ -27,6 +27,31 @@ to go
   tick
 end
 
+to testf 
+let x 10 
+let y 20
+arrrg
+let z x + y 
+show z
+end 
+
+to arrrg
+let str "aaa"
+show str
+end
+
+to param-test [param]
+let x param
+show x
+end
+
+to-report plus-five [param]
+
+let ret param + 5
+
+report ret
+end 
+
 
 ; Copyright 2003 Uri Wilensky.
 ; See Info tab for full copyright and license.

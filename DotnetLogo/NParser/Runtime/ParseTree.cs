@@ -21,10 +21,12 @@ namespace NParser.Runtime.DataStructs
     public class ParseTree
     {
         char[] delims = new[] { ' ', '[', ']', ',' };
-        string[] operators = OperatorTable.opTable.Select(o => o.Key.token).ToArray();
+        List<string> operators = OperatorTable.opTable.Select(o => o.Key.token).ToList();
+      
         public readonly TreeNode root;
       public  ParseTree(string expression)
        {
+           // operators.AddRange(SystemState.internalState.registeredFunctions.Keys);
             root = new TreeNode(expression);
             string[] tokens = StringUtilities.split(delims, expression);
 
