@@ -83,7 +83,7 @@ namespace NParser.Runtime
         {
             Function f = sys.registeredFunctions[n.data];
 
-            if (sys.registeredFunctions.ContainsKey(n.left.data) && n.right != null)
+            if (n.left != null && sys.registeredFunctions.ContainsKey(n.left.data) && n.right != null)
             {
                 TreeNode ns = ReadToLeaf(n.left);
                 ns.left = new TreeNode(n.right.data);
@@ -92,7 +92,7 @@ namespace NParser.Runtime
                 ExecFunction(n.left);
 
             }
-            else if (sys.registeredFunctions.ContainsKey(n.left.data))
+            else if (n.left != null&&sys.registeredFunctions.ContainsKey(n.left.data))
             {
                 ExecFunction(n.left);
             }
@@ -156,11 +156,11 @@ namespace NParser.Runtime
                 paramList.Add(sys.Assign(n.data));
             }
 
-            if (n.left != null)
+            if (n.left != null )
             {
                 paramList.AddRange(GetParams(n.left, functionName));
             }
-            else if (n.left == null && functionName == n.data)
+            else if (n.left == null && n.right != null && functionName == n.data)
             {
                 paramList.Add(sys.Assign(n.parent.right.data));
             }

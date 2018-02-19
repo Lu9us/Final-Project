@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2005
+VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotnetLogo", "DotnetLogo\DotnetLogo.csproj", "{3D0EE8FA-2600-4750-A6F7-D60318693108}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NParser", "NParser\NParser.csproj", "{2A6BBE6D-101B-4A8B-BAEB-880125BD9485}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NParser", "NParser\NParser.csproj", "{2A6BBE6D-101B-4A8B-BAEB-880125BD9485}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetMASS", "NetMASS\NetMASS.csproj", "{C9563739-1C09-4037-827F-E61D60E5DC96}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{2A6BBE6D-101B-4A8B-BAEB-880125BD9485}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A6BBE6D-101B-4A8B-BAEB-880125BD9485}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A6BBE6D-101B-4A8B-BAEB-880125BD9485}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9563739-1C09-4037-827F-E61D60E5DC96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9563739-1C09-4037-827F-E61D60E5DC96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9563739-1C09-4037-827F-E61D60E5DC96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9563739-1C09-4037-827F-E61D60E5DC96}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

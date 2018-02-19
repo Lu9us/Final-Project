@@ -63,7 +63,7 @@ namespace NParser.Types.Internals
 
 
            
-#if DEBUG
+#if DEBUGOPS
             foreach (OpPair c in opTable.Keys)
             {
                 Console.Write(b.GetType()); Console.Write("   "); Console.Write(b.GetType().IsSubclassOf(c.opR) || b.GetType() == c.opR); Console.Write("   ");

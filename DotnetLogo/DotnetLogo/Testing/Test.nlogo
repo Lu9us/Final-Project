@@ -32,7 +32,7 @@ let x 10
 let y 20
 arrrg
 let z x + y 
-show z
+param-test z
 end 
 
 to arrrg
