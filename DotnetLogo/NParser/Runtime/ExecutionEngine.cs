@@ -1,8 +1,10 @@
 ﻿using NParser.Runtime.DataStructs;
 using NParser.Types;
+using NParser.Types.Agents;
 using NParser.Types.Internals;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace NParser.Runtime
@@ -64,6 +66,21 @@ namespace NParser.Runtime
                 {
                     //throw new RTException("Exception occured during execution: " + e.Message);
                 }
+
+
+            }
+            if (n.data.StartsWith("create-"))
+            {
+                Function f = sys.registeredFunctions[sys.exeStack.Peek().FunctionName];
+                int i = sys.exeStack.Peek().pc + 1;
+                AgentCreationStatement ac = f.agentData.First(a => a.startOffset == i && a.breed == n.data.Split('-')[1]);
+                int count = int.Parse((string)sys.Assign(ac.countVar).value);
+                List<Agent> l = new List<Agent>();
+                for (int j = 0; j <= count; j++)
+                {
+                    l.Add(new Agent());
+                }
+
 
 
             }

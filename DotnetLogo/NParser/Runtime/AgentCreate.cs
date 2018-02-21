@@ -8,7 +8,7 @@ namespace NParser.Runtime
     {
         public int startOffset;
         public string[] lines;
-        string countVar;
-        string breed;
+        public string countVar;
+        public string breed;
     }
 }

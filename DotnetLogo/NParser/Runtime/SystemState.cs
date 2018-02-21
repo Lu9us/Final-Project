@@ -108,6 +108,7 @@ namespace NParser.Runtime
         internal Dictionary<string,Function> registeredFunctions = new Dictionary<string, Function>();
         internal Stack<StackFrame> exeStack = new Stack<StackFrame>();
         internal Dictionary<string, NetLogoObject> globals = new Dictionary<string, NetLogoObject>();
+        internal Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
         public void AddFunction(Function function)
         {
             registeredFunctions.Add(function.name, function);
