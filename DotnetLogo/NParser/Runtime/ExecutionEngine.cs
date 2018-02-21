@@ -18,6 +18,7 @@ namespace NParser.Runtime
             p = new PreProcessor(sys);
             StackFrame t = new StackFrame("INT", new Dictionary<string, NetLogoObject>());
             sys.exeStack.Push(t);
+            sys.globals.Add("ticks", new Number() { val = 0 });
         }
 
         public void Load(string path)
@@ -40,9 +41,13 @@ namespace NParser.Runtime
         private void Exec(TreeNode n, ParseTree t)
         {
 
-            if (n == t.root)
+            if (n == t.root && !t.IsOperator(n) && !sys.registeredFunctions.ContainsKey(n.data))
             {
                 return;
+            }
+            else if (sys.registeredFunctions.ContainsKey(n.data))
+            {
+                ExecFunction(n);
             }
             if (t.IsOperator(n))
             {
@@ -195,11 +200,15 @@ namespace NParser.Runtime
             NetLogoObject obj = null;
             if (nodeFull(n))
             {
-                obj = OperatorTable.Call<NetLogoObject>(sys.Assign(n.left.data,false), sys.Assign(n.right.data,false), n.data);
+                obj = OperatorTable.Call<NetLogoObject>(sys.Assign(n.left.data, false), sys.Assign(n.right.data, false), n.data);
+            }
+            else if (n.left != null)
+            {
+                obj = OperatorTable.Call<NetLogoObject>(sys.Assign(n.left.data, false), new NetLogoObject() { ptrID = "NULLPTR" }, n.data);
             }
             else
             {
-                obj = OperatorTable.Call<NetLogoObject>(sys.Assign(n.left.data,false), new NetLogoObject() {ptrID = "NULLPTR" },n.data);
+                obj = OperatorTable.Call<NetLogoObject>(new NetLogoObject() { ptrID = "NULLPTR" }, new NetLogoObject() { ptrID = "NULLPTR" }, n.data);
             }
             TreeNode tempNode = new TreeNode(obj.value.ToString());
             if (n.parent.left == n)
@@ -213,12 +222,6 @@ namespace NParser.Runtime
             tempNode.parent = n.parent;
 
         }
-
-
-
-
-
-  
 
         private TreeNode ReadToLeaf(TreeNode n)
         {

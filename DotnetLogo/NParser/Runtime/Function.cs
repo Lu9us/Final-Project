@@ -14,6 +14,7 @@ namespace NParser.Runtime
         public bool Report;
         public List<string> paramaters = new List<string>();
         public List<FlowControll> flowControls = new List<FlowControll>();
+        public List<Ask> askData = new List<Ask>();
         public Function( string [] body,int offset,string name)
         {
             this.body = body;

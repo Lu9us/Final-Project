@@ -102,6 +102,8 @@ namespace NParser.Types.Internals
             opTable.Add(new OpPair(typeof(Number), typeof(Number), typeof(NetLogoObject), "/"), tempAdd);
             tempAdd = OperatorFunctions.order;
             opTable.Add(new OpPair(typeof(Number), typeof(Number), typeof(NetLogoObject), "*"), tempAdd);
+            temp = OperatorFunctions.reset;
+            opTable.Add(new OpPair(typeof(NetLogoObject), typeof(NetLogoObject), typeof(NetLogoObject), "clear-all", false), temp);
         }
 
     }

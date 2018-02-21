@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -15,53 +16,63 @@ namespace NParser.Utils
         /// <returns></returns>
         public static string[] split(char[] delims, string data)
         {
-            List<string> split = new List<string>();
-            string workingString = new string(data.ToCharArray());
-
-            int i = 0;
-
-            while (i < workingString.Length)
+            try
             {
-                if (delims.Contains(workingString[i]))
+                List<string> split = new List<string>();
+                string workingString = new string(data.ToCharArray());
+
+                int i = 0;
+
+                while (i < workingString.Length)
                 {
-
-
-                    if (!string.IsNullOrEmpty(workingString.Substring(0, i)))
+                    if (delims.Contains(workingString[i]))
                     {
-                        split.Add(workingString.Substring(0, i));
-                    }
-                    string s = "";
-                    s += workingString[i];
-                    split.Add(s);
 
 
-                    if (i < workingString.Length - 1)
-                    {
-                        string temp = "";
-                        for (int x = i + 1; x < workingString.Length; x++)
+                        if (!string.IsNullOrEmpty(workingString.Substring(0, i)))
                         {
-                            temp += workingString[x];
+                            split.Add(workingString.Substring(0, i));
                         }
-                        workingString = temp;
+                        string s = "";
+                        s += workingString[i];
+                        split.Add(s);
+
+
+                        if (i < workingString.Length - 1)
+                        {
+                            string temp = "";
+                            for (int x = i + 1; x < workingString.Length; x++)
+                            {
+                                temp += workingString[x];
+                            }
+                            workingString = temp;
+                        }
+                        else
+                        { break; }
+                        i = 0;
+
                     }
                     else
-                    { break; }
-                    i = 0;
-
+                    {
+                        i++;
+                    }
                 }
-                else
+                if (workingString.Length > 0 &&split.Count > 0 && workingString != split.Last())
                 {
-                    i++;
+                    split.Add(workingString);
                 }
+
+
+                split.RemoveAll(a => string.IsNullOrWhiteSpace(a));
+                return split.ToArray();
             }
-            if (workingString.Length > 0)
+            catch (Exception e)
             {
-                split.Add(workingString);
+#if DEBUG
+               Debugger.Break();
+#endif
+                return null;
             }
-
-
-            split.RemoveAll(a => string.IsNullOrWhiteSpace(a));
-            return split.ToArray();
         }
 
 

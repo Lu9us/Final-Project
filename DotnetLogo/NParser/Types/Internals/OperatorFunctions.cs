@@ -48,7 +48,11 @@ namespace NParser.Types.Internals
         {
             return new Number() { val = n.val * b.val };
         }
-
+        public static NetLogoObject reset(NetLogoObject o, NetLogoObject n)
+        {
+            sys.globals["ticks"].value = 0;
+            return new NetLogoObject() { ptrID = "NULLPTR" };
+        }
 
     }
 }

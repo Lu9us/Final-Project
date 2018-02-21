@@ -25,6 +25,8 @@ namespace NParser
         string[] agentDeclarativeKeywords = { "-own" };
         string[] functionDeclarativeKeywords = { "to" };
         string[] flowControllKeywords = { "if","elseif"};
+        string askKeyword = "ask";
+        string createKeyword = "create-";
           char[] delims = new[] { ' ', '[', ']', ',' };
 
 
@@ -59,7 +61,7 @@ namespace NParser
                     else if (declarativeKeywords.Any(a => line.StartsWith(a)))
                     {
                         Console.WriteLine("Declartive statment");
-                        Declarative(line);
+                       // Declarative(line);
 
                     }
                     else if (agentDeclarativeKeywords.Any(a => FirstStatment.Contains(a)))
@@ -144,11 +146,138 @@ namespace NParser
                 throw new RTException("malformed expression on line: " +PC);
             }
         }
-
-        public void Declarative(string line)
+        public AgentCreate AgentCreate(string line, int tpc)
         {
-          
-              
+
+            int tempPC = tpc;
+            int spc = tpc;
+
+            string token = "";
+            try
+            {
+                string[] lineData = StringUtilities.split(new[] { '-',' ' }, this.data[spc]);
+                List<FlowControll> fc = new List<FlowControll>();
+                bool report = false;
+                bool param = false;
+                string name = lineData[1];
+                string count = lineData[2];
+                Stack<string> stack = new Stack<string>();
+
+
+                do
+                {
+                    lineData = StringUtilities.split(delims, this.data[tempPC]);
+                    foreach (string td in lineData)
+                    {
+
+
+
+                        if (flowControllKeywords.Any(a => td.Equals(a)))
+                        {
+                            fc.Add(FlowControl(tempPC - 1, this.data[tempPC - 1]));
+                        }
+
+                        if (td == "]")
+                        {
+                            stack.Pop();
+                        }
+                        else if (td == "[")
+                        {
+                            stack.Push("[");
+                        }
+                    }
+                    tempPC++;
+                    //token = this.data[tempPC];
+
+                }
+                while (stack.Count > 0);
+                string[] lines = new string[tempPC - 1 - (spc + 1)];
+                for (int i = spc + 1; i < tempPC - 1; i++)
+                {
+                    lines[i - (spc + 1)] = this.data[i];
+
+                }
+
+                AgentCreationStatement statement = new AgentCreationStatement();
+               
+                return statement;
+            }
+            catch (Exception e)
+            {
+#if DEBUG
+                Debugger.Break();
+#endif
+                throw new RTException("Function parsing failed on line " + tempPC + " with exception " + e.Message);
+            }
+
+
+        }
+
+        public Ask AskDeclarative(string line,int tpc)
+        {
+
+            int tempPC = tpc;
+            int spc = tpc;
+
+            string token = "";
+            try
+            {
+                string[] lineData = StringUtilities.split(delims, this.data[spc]);
+                List<FlowControll> fc = new List<FlowControll>();
+                List<string> paramaters = new List<string>();
+                bool report = false;
+                bool param = false;
+                string name = lineData[1];
+                Stack<string> stack = new Stack<string>();
+                
+
+                do
+                {
+                    lineData = StringUtilities.split(delims, this.data[tempPC]);
+                    foreach (string td in lineData)
+                    {
+
+
+
+                        if (flowControllKeywords.Any(a => td.Equals(a)))
+                        {
+                            fc.Add(FlowControl(tempPC - 1, this.data[tempPC - 1]));
+                        }
+
+                        if (td == "]")
+                        {
+                            stack.Pop();
+                        }
+                        else if (td == "[")
+                        {
+                            stack.Push("[");
+                        }
+                    }
+                    tempPC++;
+                    //token = this.data[tempPC];
+
+                }
+                while (stack.Count > 0);
+                string[] lines = new string[tempPC - 1 - (spc + 1) ];
+                for (int i = spc+1; i < tempPC-1; i++)
+                {
+                    lines[i - (spc + 1)] = this.data[i];
+
+                }
+
+                Ask f = new Ask(lines, spc + 1, name) { paramaters = paramaters, Report = report };
+                f.flowControls = fc;
+                return f;
+            }
+            catch (Exception e)
+            {
+#if DEBUG
+                Debugger.Break();
+#endif
+                throw new RTException("Function parsing failed on line " + tempPC + " with exception " + e.Message);
+            }
+
+
         }
 
         public void FunctionDeclarative(string line)
@@ -161,6 +290,7 @@ namespace NParser
                 string[] lineData = StringUtilities.split(delims, this.data[PC]);
                 List<FlowControll> fc = new List<FlowControll>();
                 List<string> paramaters = new List<string>();
+                List<Ask> ak = new List<Ask>();
                 bool report = false;
                 bool param = false;
                 string name = lineData[1];
@@ -170,10 +300,18 @@ namespace NParser
                 }
                 while (token != "end")
                 {
+                    if (this.data[tempPC].IndexOfAny(delims) != -1)
+                    {
+                        lineData = StringUtilities.split(delims, this.data[tempPC]);
+                    }
+                    else
+                    {
+                        lineData = new[] { this.data[tempPC] };
+                    }
                     foreach (string td in lineData)
                     {
-
-                        if (td == "[" && lineData[1] == name)
+                        
+                        if (td.Length > 1 &&td == "[" && lineData[1] == name)
                         {
                             param = true;
                         }
@@ -185,10 +323,18 @@ namespace NParser
                         { paramaters.Add(td); }
                         if (flowControllKeywords.Any(a => td.Equals(a)))
                         {
-                          fc.Add(FlowControl(tempPC-1, this.data[tempPC-1]));
+                          fc.Add(FlowControl(tempPC, this.data[tempPC]));
+                        }
+                        if (td.Equals(askKeyword))
+                        {
+                            ak.Add(AskDeclarative(this.data[tempPC],tempPC));
+                        }
+                        if (td.StartsWith(createKeyword))
+                        {
+
                         }
                     }
-                    lineData = StringUtilities.split(delims, this.data[tempPC]);
+                    
                     foreach (string s in lineData)
                     {
                         if (s == "end")
@@ -209,11 +355,12 @@ namespace NParser
                 }
 
                 Function f = new Function(lines, PC + 1, name) { paramaters = paramaters, Report = report };
+                f.askData = ak;
                 f.flowControls = fc;
                 s.AddFunction(f);
             }
             catch (Exception e)
-            { throw new RTException("Function parsing failed on line "+ PC + " with exception "+ e.Message); }
+            { throw new RTException("Function parsing failed on line "+ tempPC + " with exception "+ e.Message); }
 
 
         }

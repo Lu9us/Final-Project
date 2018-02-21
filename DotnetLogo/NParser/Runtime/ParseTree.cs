@@ -69,7 +69,7 @@ namespace NParser.Runtime.DataStructs
         private TreeNode NodeGen( Stack<string> tokenStack, Stack<string> opearatorStack,TreeNode parent)
         {
             TreeNode tempNode = null;
-            if (opearatorStack.Count > 0)
+            if (tokenStack.Count > 0 && opearatorStack.Count > 0)
             {
                 tempNode = new TreeNode(opearatorStack.Pop());
                 tempNode.parent = parent;
@@ -86,6 +86,12 @@ namespace NParser.Runtime.DataStructs
                     tempNode.left.parent = tempNode;
                 }
             
+            }
+            if (opearatorStack.Count > 0 && tokenStack.Count < 1)
+            {
+                tempNode = new TreeNode(opearatorStack.Pop());
+                tempNode.parent = parent;
+
             }
             if (opearatorStack.Count > 0)
             {
