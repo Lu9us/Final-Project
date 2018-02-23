@@ -102,8 +102,15 @@ namespace NParser.Types.Internals
             opTable.Add(new OpPair(typeof(Number), typeof(Number), typeof(NetLogoObject), "/"), tempAdd);
             tempAdd = OperatorFunctions.order;
             opTable.Add(new OpPair(typeof(Number), typeof(Number), typeof(NetLogoObject), "*"), tempAdd);
+            tempAdd = OperatorFunctions.setxy;
+            opTable.Add(new OpPair(typeof(Number), typeof(Number), typeof(NetLogoObject), "setxy"), tempAdd);
             temp = OperatorFunctions.reset;
             opTable.Add(new OpPair(typeof(NetLogoObject), typeof(NetLogoObject), typeof(NetLogoObject), "clear-all", false), temp);
+            temp = OperatorFunctions.reset;
+            opFunct<NetLogoObject, NetLogoObject, Number> tempN = OperatorFunctions.random;
+            opTable.Add(new OpPair(typeof(NetLogoObject), typeof(NetLogoObject), typeof(Number), "random-xcor", false), tempN);
+            tempN = OperatorFunctions.random;
+            opTable.Add(new OpPair(typeof(NetLogoObject), typeof(NetLogoObject), typeof(Number), "random-ycor", false), tempN);
         }
 
     }

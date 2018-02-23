@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using NParser.Utils;
 using static NParser.Runtime.FlowControll;
 
 namespace NParser
@@ -36,8 +37,14 @@ namespace NParser
         }
         public void LoadFile(string fileName)
         {
-            data = File.ReadAllLines(fileName);
-
+            try
+            {
+                data = File.ReadAllLines(fileName);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("file not found");
+            }
         }
 
         public void FirstPassRead()
@@ -146,7 +153,7 @@ namespace NParser
                 throw new RTException("malformed expression on line: " +PC);
             }
         }
-        public AgentCreate AgentCreate(string line, int tpc)
+        public AgentCreationStatement AgentCreate(string line, int tpc,int offset)
         {
 
             int tempPC = tpc;
@@ -159,8 +166,8 @@ namespace NParser
                 List<FlowControll> fc = new List<FlowControll>();
                 bool report = false;
                 bool param = false;
-                string name = lineData[1];
-                string count = lineData[2];
+                string name = lineData[2];
+                string count = lineData[3];
                 Stack<string> stack = new Stack<string>();
 
 
@@ -198,7 +205,7 @@ namespace NParser
 
                 }
 
-                AgentCreationStatement statement = new AgentCreationStatement();
+                AgentCreationStatement statement = new AgentCreationStatement() {startOffset = offset,lines = lines,breed=name,countVar = count };
                
                 return statement;
             }
@@ -291,6 +298,7 @@ namespace NParser
                 List<FlowControll> fc = new List<FlowControll>();
                 List<string> paramaters = new List<string>();
                 List<Ask> ak = new List<Ask>();
+                List<AgentCreationStatement> createAgents = new List<AgentCreationStatement>();
                 bool report = false;
                 bool param = false;
                 string name = lineData[1];
@@ -331,7 +339,7 @@ namespace NParser
                         }
                         if (td.StartsWith(createKeyword))
                         {
-
+                            createAgents.Add(AgentCreate(this.data[tempPC], tempPC, tempPC-PC));
                         }
                     }
                     
@@ -357,6 +365,7 @@ namespace NParser
                 Function f = new Function(lines, PC + 1, name) { paramaters = paramaters, Report = report };
                 f.askData = ak;
                 f.flowControls = fc;
+                f.agentData = createAgents;
                 s.AddFunction(f);
             }
             catch (Exception e)

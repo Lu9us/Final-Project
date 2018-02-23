@@ -2,6 +2,7 @@
 using NParser.Types.Agents;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace NParser.Runtime
@@ -102,6 +103,25 @@ namespace NParser.Runtime
                 return globals[s];
             }
             return null;
+        }
+        public void PrintCallStack()
+        {
+            StackFrame f;
+            Queue<StackFrame> tempQueue = new Queue<StackFrame>();
+            while (exeStack.Count > 0)
+            {
+                f = exeStack.Pop();
+                tempQueue.Enqueue(f);
+                Console.WriteLine(f.ToString());
+            }
+
+            while (tempQueue.Count > 0)
+            {
+                exeStack.Push(tempQueue.Dequeue());
+
+            }
+            exeStack = new Stack<StackFrame>( exeStack.Reverse());
+
         }
 
         public Patch[,] patches;

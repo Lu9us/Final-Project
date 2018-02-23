@@ -91,6 +91,16 @@ namespace NParser.Runtime.DataStructs
             {
                 tempNode = new TreeNode(opearatorStack.Pop());
                 tempNode.parent = parent;
+                if (parent.parent != null&& parent != null&& parent.parent != root && parent.parent.right == null)
+                {
+                    
+                    tempNode.parent.parent.right = tempNode;
+                    return null;
+                }
+                else
+                {
+                    tempNode.parent.left = tempNode;
+                }
 
             }
             if (opearatorStack.Count > 0)

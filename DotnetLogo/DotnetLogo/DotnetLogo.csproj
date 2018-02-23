@@ -49,6 +49,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Testing\Life.nlogo">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Testing\Test.nlogo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

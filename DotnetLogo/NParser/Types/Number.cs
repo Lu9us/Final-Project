@@ -8,7 +8,7 @@ namespace NParser.Types
     {
         public float val;
 
-        public override object value { get { return val; } set { } }
+        public override object value { get { return val; } set { val = float.Parse(value.ToString()); } }
         public override string ToString()
         {
             return val.ToString();

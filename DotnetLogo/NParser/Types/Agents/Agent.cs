@@ -12,6 +12,8 @@ namespace NParser.Types.Agents
         {
             ID = IDCOUNT;
             IDCOUNT++;
+            properties.AddProperty("color", new Integer());
+            properties.protectedType.Add("color", typeof(NSString));
         }
     }
 }

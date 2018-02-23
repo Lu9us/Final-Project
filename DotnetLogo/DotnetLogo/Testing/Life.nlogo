@@ -5,16 +5,20 @@
 
 to setup-blank
   clear-all
-  ask patches [ cell-death ]
+  ask patches [ 
+  cell-death 
+  ]
   reset-ticks
 end
 
 to setup-random
   clear-all
   ask patches
-    [ ifelse random-float 100.0 < initial-density
+    [ 
+	ifelse random-float 100.0 < initial-density
       [ cell-birth ]
-      [ cell-death ] ]
+      [ cell-death ] 
+	  ]
   reset-ticks
 end
 

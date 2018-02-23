@@ -26,12 +26,12 @@ namespace NParser.Types
 
             foreach (KeyValuePair<string, NetLogoObject> par in param)
             {
-                s += par.Key + "    " + par.Value;
+                s += par.Key + "    " + par.Value.ToString();
                 s += Environment.NewLine;
             }
             foreach (KeyValuePair<string, NetLogoObject> par in locals)
             {
-                s += par.Key + "    " + par.Value;
+                s += par.Key + "    " + par.Value.ToString();
                 s += Environment.NewLine;
             }
             s += "program counter: " + pc;

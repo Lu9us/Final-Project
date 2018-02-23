@@ -1,12 +1,14 @@
 ﻿using NParser.Runtime;
+using NParser.Types.Agents;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace NParser.Types.Internals
 {
-   public class OperatorFunctions
+   public static class OperatorFunctions
     {
+        private static Random r = new Random(DateTime.Now.Day + DateTime.Now.Month + DateTime.Now.Year);
         private static SystemState sys = SystemState.internalState;
         public static NetLogoObject let(NetLogoObject o, NetLogoObject n)
         {
@@ -48,6 +50,30 @@ namespace NParser.Types.Internals
         {
             return new Number() { val = n.val * b.val };
         }
+        public static NetLogoObject setxy(Number x, Number y)
+        {
+            if (sys.exeStack.Peek().isAsk)
+            {
+                foreach (MetaAgent m in (List<MetaAgent>)sys.Get("Agents").value )
+                {
+                    m.properties.SetProperty("X", new Integer() { value = x.value });
+                    m.properties.SetProperty("Y", new Integer() { value = y.value });
+                    m.x =(int) x.val;
+                    m.y = (int)y.val;
+                }
+
+            }
+
+            return new NetLogoObject() { ptrID = "NULLPTR" };
+        }
+
+        public static Number random(NetLogoObject o, NetLogoObject n)
+        {
+            int x = r.Next(100);
+            return new Number() {value = x};
+
+        }
+
         public static NetLogoObject reset(NetLogoObject o, NetLogoObject n)
         {
             sys.globals["ticks"].value = 0;
