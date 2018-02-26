@@ -12,8 +12,9 @@ namespace NParser.Types.Agents
         {
             ID = IDCOUNT;
             IDCOUNT++;
-            properties.AddProperty("color", new Integer());
+            properties.AddProperty("color", new NSString());
             properties.protectedType.Add("color", typeof(NSString));
+            properties.properties["color"] = new NSString() { val = "black" };
         }
     }
 }

@@ -51,6 +51,10 @@ namespace NParser.Runtime
                 {
                     return new Number() { val = float.Parse(s) };
                 }
+                else if (s.StartsWith("color."))
+                {
+                    return new Colour() { value = s };
+                }
                 else if (char.IsLetter(s[0]))
                 {
                     if (Get(s) != null && getValFromRef)
@@ -61,17 +65,36 @@ namespace NParser.Runtime
                     {
                         return new NetLogoObject() { ptrID = s };
                     }
-                 
-                   
+
+
                 }
                 else if (s[0] == '"')
                 { return new NSString() { val = s }; }
+               
             }
             return new NetLogoObject() { ptrID = s };
 
         }
 
-        public string GetVal(NetLogoObject o)
+        public List<MetaAgent> GetBreed(string breed)
+        {
+            List<MetaAgent> data = new List<MetaAgent>();
+            if (breed == "patches")
+            {
+                foreach (Patch p in patches)
+                {
+                    data.Add(p);
+                }
+            }
+            else if (breed == "turtles")
+            {
+                data.AddRange(agents.Values);
+            }
+            return data;
+
+        }
+
+            public string GetVal(NetLogoObject o)
         {
             if (o is Number)
             {

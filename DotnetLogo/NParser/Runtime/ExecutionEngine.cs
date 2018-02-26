@@ -104,13 +104,27 @@ namespace NParser.Runtime
                 }
 
 #if DEBUG
-              //  sys.PrintCallStack();
+                //  sys.PrintCallStack();
 #endif
                 StackFrame oldFrame = sys.exeStack.Pop();
 #if DEBUG
                 Console.WriteLine(oldFrame.ToString());
 #endif
                 SkipToJump = true;
+            }
+            else if (n.data.StartsWith("ask"))
+            {
+                Function f = sys.registeredFunctions[sys.exeStack.Peek().FunctionName];
+                string name = n.data.Split('-')[1];
+                Ask a =  f.askData.First(ab => ab.name == n.data.Split('-')[1] && sys.exeStack.Peek().pc == ab.pcOffset);
+                List<MetaAgent> param = sys.GetBreed(name);
+
+                StackFrame ff = new StackFrame(name + "-ask", new Dictionary<string, NetLogoObject> { { "Agents", new AgentSet(param) } }) {isAsk = true };
+                ExecFrame(ff, f, n);
+                SkipToJump = true;
+
+
+
             }
             if (!SkipToJump)
             {
@@ -189,6 +203,50 @@ namespace NParser.Runtime
                     ExecFunction(n.right);
                 }
             }
+        }
+
+
+        public void ExecFrame(StackFrame fFrame, Function f, TreeNode n)
+        {
+
+            fFrame.pc = 0;
+            sys.exeStack.Push(fFrame);
+            ParseTree pt;
+            while (fFrame.pc < f.body.Length && !sys.BreakExecution)
+            {
+                pt = new ParseTree(f.body[fFrame.pc]);
+
+
+
+                ExecuteTree(pt);
+                fFrame.pc++;
+            }
+#if DEBUG 
+            Console.WriteLine("Execution broken : " + sys.BreakExecution);
+#endif 
+
+            if (f.Report && sys.exeStack.Peek().ReportValue != null)
+            {
+                sys.BreakExecution = false;
+                TreeNode tempNode = new TreeNode(sys.Assign(sys.exeStack.Peek().ReportValue.value.ToString()).value.ToString());
+                if (n.parent.left == n)
+                {
+                    n.parent.left = tempNode;
+                }
+                else if (n.parent.right == n)
+                {
+                    n.parent.right = tempNode;
+                }
+                tempNode.parent = n.parent;
+
+            }
+
+
+            StackFrame oldFrame = sys.exeStack.Pop();
+#if DEBUG
+            Console.WriteLine(oldFrame.ToString());
+#endif
+
         }
 
 

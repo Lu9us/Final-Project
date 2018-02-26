@@ -5,7 +5,7 @@ using System.Text;
 
 namespace NParser.Types
 {
-    public class Colour : NetLogoObject
+    public class NSString : NetLogoObject
     {
 
         types type;

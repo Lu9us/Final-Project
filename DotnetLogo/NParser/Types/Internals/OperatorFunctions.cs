@@ -12,8 +12,20 @@ namespace NParser.Types.Internals
         private static SystemState sys = SystemState.internalState;
         public static NetLogoObject let(NetLogoObject o, NetLogoObject n)
         {
-          //  var v = sys.Assign(n.value.ToString());
-            sys.exeStack.Peek().locals.Add((string)o.value, n);
+            if (sys.exeStack.Peek().isAsk)
+            {
+              var v =  ((List<MetaAgent>)sys.exeStack.Peek().param["Agents"].value);
+                foreach (MetaAgent m in v)
+                {
+                    m.properties.AddProperty((string)o.value, n);
+                }
+                return new NetLogoObject() {ptrID ="NULLPTR" };
+            }
+            else
+            {
+                //  var v = sys.Assign(n.value.ToString());
+                sys.exeStack.Peek().locals.Add((string)o.value, n);
+            }
             return new NetLogoObject() { ptrID = o.ptrID };
         }
         public static NetLogoObject report(NetLogoObject o, NetLogoObject d)
@@ -30,7 +42,20 @@ namespace NParser.Types.Internals
         }
         public static NetLogoObject set(NetLogoObject o, NetLogoObject n)
         {
-            sys.exeStack.Peek().locals[(string)o.value] = n;
+            if (sys.exeStack.Peek().isAsk)
+            {
+                var v = ((List<MetaAgent>)sys.exeStack.Peek().param["Agents"].value);
+                foreach (MetaAgent m in v)
+                {
+                    m.properties.SetProperty((string)o.value, n);
+                }
+                return new NetLogoObject() { ptrID = "NULLPTR" };
+            }
+            else
+            {
+                sys.exeStack.Peek().locals[(string)o.value] = n;
+            }
+        
             return new NetLogoObject() { ptrID = o.ptrID };
 
         }

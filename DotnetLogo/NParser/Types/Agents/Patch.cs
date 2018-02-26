@@ -17,9 +17,9 @@ namespace NParser.Types.Agents
             properties.properties["Y"] = ny;
             properties.protectedValue.Add("X");
             properties.protectedValue.Add("Y");
-            properties.AddProperty("p-color", new Colour());
-            properties.protectedType.Add("p-color",typeof(Colour));
-
+            properties.AddProperty("p-color", new NSString());
+            properties.protectedType.Add("p-color",typeof(NSString));
+            properties.properties["p-color"] = new NSString() { val = "black" };
 
 
         }

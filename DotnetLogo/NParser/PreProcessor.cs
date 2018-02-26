@@ -220,7 +220,7 @@ namespace NParser
 
         }
 
-        public Ask AskDeclarative(string line,int tpc)
+        public Ask AskDeclarative(string line,int tpc,int offset)
         {
 
             int tempPC = tpc;
@@ -272,7 +272,7 @@ namespace NParser
 
                 }
 
-                Ask f = new Ask(lines, spc + 1, name) { paramaters = paramaters, Report = report };
+                Ask f = new Ask(lines, spc + 1, name) { pcOffset = offset, paramaters = paramaters, Report = report };
                 f.flowControls = fc;
                 return f;
             }
@@ -335,7 +335,7 @@ namespace NParser
                         }
                         if (td.Equals(askKeyword))
                         {
-                            ak.Add(AskDeclarative(this.data[tempPC],tempPC));
+                            ak.Add(AskDeclarative(this.data[tempPC],tempPC, tempPC - PC));
                         }
                         if (td.StartsWith(createKeyword))
                         {

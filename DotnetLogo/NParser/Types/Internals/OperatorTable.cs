@@ -77,9 +77,15 @@ namespace NParser.Types.Internals
             OpPair v =  opTable.First(c => (a.GetType().IsSubclassOf(c.Key.opL) || a.GetType() == c.Key.opL) && (b.GetType().IsSubclassOf(c.Key.opR) || b.GetType() == c.Key.opR) && c.Key.token == s).Key;
             if (d != null)
             {
-                
 
-                return (t3)d.DynamicInvoke(new[] { a, b });
+                try
+                {
+                    return (t3)d.DynamicInvoke(new[] { a, b });
+                }
+                catch (Exception e)
+                {
+                    throw new RTException("Error occured during operator evaluation ERROR: " + e.Message);
+                }
             }
             return default(t3);
         }

@@ -4,7 +4,7 @@ to setup
   clear-all
   create-turtles 5 [ 
       setxy random-xcor random-ycor
-      set color yellow
+      set color "yellow"
 	  ]  
 	  ;; varying the color makes the bees easier to follow with your eyes
   ask patches  [
@@ -24,7 +24,7 @@ to go
     diffuse chemical 0.1
     ask patches [
       set chemical chemical * 0.90       ;; evaporate chemical
-      set pcolor scale-color gray chemical 0 20
+      set pcolor "grey"
     ]
   ]
   tick
