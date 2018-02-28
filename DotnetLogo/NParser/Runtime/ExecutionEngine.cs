@@ -19,7 +19,9 @@ namespace NParser.Runtime
         {
 
             p = new PreProcessor(sys);
+            SystemState.internalState = sys;
             StackFrame t = new StackFrame("INT", new Dictionary<string, NetLogoObject>());
+            OperatorFunctions.ResetSystemState();
             sys.exeStack.Push(t);
             sys.globals.Add("ticks", new Number() { val = 0 });
         }
@@ -31,20 +33,48 @@ namespace NParser.Runtime
                 p.FirstPassRead();
 
         }
+        public void Load(string[] data)
+        {
+            p.SetData(data);
+            while (!p.fileEnd)
+                p.FirstPassRead();
+
+
+        }
 
         public void ExecuteTree(ParseTree t)
         {
+            if (sys.exeStack.Peek().FunctionName == "INT")
+            {
+                sys.exeStack.Peek().pc = 0;
+            }
             TreeNode n = ReadToLeaf(t.root);
+            if (t.root.left == null && t.root.right == null&& n == t.root)
+            {
+                t.root = new TreeNode(n.data + "ROOT");
+                n.left = new TreeNode(n.data);
+                n.left.parent = t.root;
+                t.root.left = n.left;
+                n = n.left;
+            }
             Exec(n, t);
 
 
 
         }
+       
 
         private void Exec(TreeNode n, ParseTree t)
         {
+            
 
-            if (n == t.root && !t.IsOperator(n) && !sys.registeredFunctions.ContainsKey(n.data))
+            SkipToJump = false;
+            if (n == null)
+            {
+                return;
+            }
+
+            if (n == t.root )//&& !t.IsOperator(n) && !sys.registeredFunctions.ContainsKey(n.data))
             {
                 return;
             }
@@ -59,19 +89,7 @@ namespace NParser.Runtime
                 ExecOp(n);
 
             }
-            else if (sys.checkType(n.data) == typeof(NetLogoObject) && sys.registeredFunctions.ContainsKey(n.data))
-            {
-                try
-                {
-                    ExecFunction(n);
-                }
-                catch (Exception e)
-                {
-                    //throw new RTException("Exception occured during execution: " + e.Message);
-                }
-
-
-            }
+          
             if (n.data.StartsWith("create-"))
             {
                 Function f = sys.registeredFunctions[sys.exeStack.Peek().FunctionName];
@@ -84,7 +102,7 @@ namespace NParser.Runtime
                 {
                     l.Add(new Agent());
                 }
-                sys.exeStack.Peek().pc = i + ac.lines.Count();
+                sys.exeStack.Peek().pc =+ ac.lines.Count()+1;
                 StackFrame s = new StackFrame("NEWAGENT " + ac.breed, new Dictionary<string, NetLogoObject>() { { "Agents", new AgentSet(l) } }) { isAsk = true };
 
                 sys.exeStack.Push(s);
@@ -107,6 +125,7 @@ namespace NParser.Runtime
                 //  sys.PrintCallStack();
 #endif
                 StackFrame oldFrame = sys.exeStack.Pop();
+                //sys.exeStack.Peek().pc += oldFrame.pc;
 #if DEBUG
                 Console.WriteLine(oldFrame.ToString());
 #endif
@@ -114,13 +133,21 @@ namespace NParser.Runtime
             }
             else if (n.data.StartsWith("ask"))
             {
+                string name;
                 Function f = sys.registeredFunctions[sys.exeStack.Peek().FunctionName];
-                string name = n.data.Split('-')[1];
-                Ask a =  f.askData.First(ab => ab.name == n.data.Split('-')[1] && sys.exeStack.Peek().pc == ab.pcOffset);
+                try
+                {
+                   name  = n.data.Split('-')[1];
+                }
+                catch (Exception e)
+                {
+                     name = n.left.data;
+                }
+                Ask a =  f.askData.First(ab => ab.name == name && sys.exeStack.Peek().pc == ab.pcOffset|| sys.exeStack.Peek().pc + 1 == ab.pcOffset);
                 List<MetaAgent> param = sys.GetBreed(name);
 
                 StackFrame ff = new StackFrame(name + "-ask", new Dictionary<string, NetLogoObject> { { "Agents", new AgentSet(param) } }) {isAsk = true };
-                ExecFrame(ff, f, n);
+                ExecFrame(ff, a, n);
                 SkipToJump = true;
 
 
@@ -206,6 +233,7 @@ namespace NParser.Runtime
         }
 
 
+
         public void ExecFrame(StackFrame fFrame, Function f, TreeNode n)
         {
 
@@ -240,9 +268,28 @@ namespace NParser.Runtime
                 tempNode.parent = n.parent;
 
             }
+            else
+            {
+                if (n.parent != null)
+                {
+                    if (n.parent.left == n)
+                    {
+                        n.parent.left = null;
+                    }
+                    else if (n.parent.right == n)
+                    {
+                        n.parent.right = null;
+                    }
+                }
+                else
+                {
+                    n = null;
+                }
+            }
 
 
             StackFrame oldFrame = sys.exeStack.Pop();
+            sys.exeStack.Peek().pc += oldFrame.pc+1;
 #if DEBUG
             Console.WriteLine(oldFrame.ToString());
 #endif
@@ -267,42 +314,7 @@ namespace NParser.Runtime
             StackFrame fFrame = new StackFrame(f.name, objects) { Report = f.Report };
 
             fFrame.pc = 0;
-            sys.exeStack.Push(fFrame);
-            ParseTree pt;
-            while (fFrame.pc < f.body.Length && !sys.BreakExecution)
-            {
-                pt = new ParseTree(f.body[fFrame.pc]);
-                
-
-
-                ExecuteTree(pt);
-               fFrame.pc++;
-            }
-#if DEBUG 
-            Console.WriteLine("Execution broken : "+ sys.BreakExecution);
-#endif 
-
-            if (f.Report && sys.exeStack.Peek().ReportValue != null)
-            {
-                sys.BreakExecution = false;
-                TreeNode tempNode = new TreeNode(sys.Assign(sys.exeStack.Peek().ReportValue.value.ToString()).value.ToString());
-                if (n.parent.left == n)
-                {
-                    n.parent.left = tempNode;
-                }
-                else if (n.parent.right == n)
-                {
-                    n.parent.right = tempNode;
-                }
-                tempNode.parent = n.parent;
-
-            }
-
-
-          StackFrame oldFrame = sys.exeStack.Pop();
-#if DEBUG
-         Console.WriteLine(oldFrame.ToString());
-#endif
+            ExecFrame(fFrame, f, n);
         }
         private List<NetLogoObject> GetParams(TreeNode n,string functionName)
         {
@@ -366,16 +378,19 @@ namespace NParser.Runtime
                 obj = OperatorTable.Call<NetLogoObject>(new NetLogoObject() { ptrID = "NULLPTR" }, new NetLogoObject() { ptrID = "NULLPTR" }, n.data);
             }
             TreeNode tempNode = new TreeNode(obj.value.ToString());
-            if (n.parent.left == n)
+            if (n.parent != null)
             {
-                n.parent.left = tempNode;
-            }
-            else if (n.parent.right == n)
-            {
-                n.parent.right = tempNode;
-            }
-            tempNode.parent = n.parent;
+                if (n.parent.left == n)
+                {
+                    n.parent.left = tempNode;
+                }
+                else if (n.parent.right == n)
+                {
+                    n.parent.right = tempNode;
+                }
 
+                tempNode.parent = n.parent;
+            }
         }
 
         private bool isOp(TreeNode n)

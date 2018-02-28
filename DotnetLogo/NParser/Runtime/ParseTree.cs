@@ -23,51 +23,58 @@ namespace NParser.Runtime.DataStructs
         char[] delims = new[] { ' ', '[', ']', ',' };
         List<string> operators = OperatorTable.opTable.Select(o => o.Key.token).ToList();
       
-        public readonly TreeNode root;
+        public  TreeNode root;
       public  ParseTree(string expression)
        {
            // operators.AddRange(SystemState.internalState.registeredFunctions.Keys);
             root = new TreeNode(expression);
             string[] tokens = StringUtilities.split(delims, expression);
-
-            Stack<string> tokenStack = new Stack<string>();
+            if (expression.Trim().StartsWith(";"))
+            {
+                this.root =new TreeNode(expression);
+                return;
+                
+            }
+                Stack<string> tokenStack = new Stack<string>();
             Stack<string> opearatorStack = new Stack<string>();
 
-          
+
 
             foreach (string data in tokens.Reverse())
             {
-                if (!string.IsNullOrWhiteSpace(data))
-                {
-                    if (operators.Contains(data))
+               
+                    if (!string.IsNullOrWhiteSpace(data))
                     {
+                        if (operators.Contains(data))
+                        {
 
 
 
-                        opearatorStack.Push(data);
+                            opearatorStack.Push(data);
+
+                        }
+
+                        else
+                        {
+                            tokenStack.Push(data);
+                        }
+
 
                     }
-
-                    else
-                    {
-                        tokenStack.Push(data);
-                    }
-
-
                 }
-            }
-            if (tokenStack.Count == 0 && opearatorStack.Count == 0)
-            {
-                return;
-            }
+                if (tokenStack.Count == 0 && opearatorStack.Count == 0)
+                {
+                    return;
+                }
 
-            this.root.left = NodeGen( tokenStack, opearatorStack,this.root);
-
+                this.root.left = NodeGen(tokenStack, opearatorStack, this.root);
+            
         }
 
 
         private TreeNode NodeGen( Stack<string> tokenStack, Stack<string> opearatorStack,TreeNode parent)
         {
+           
             TreeNode tempNode = null;
             if (tokenStack.Count > 0 && opearatorStack.Count > 0)
             {

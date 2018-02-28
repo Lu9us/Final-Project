@@ -34,16 +34,23 @@
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.txtScript = new System.Windows.Forms.TextBox();
+            this.pbSim = new System.Windows.Forms.PictureBox();
+            this.txtConsole = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
+            this.btbExec = new System.Windows.Forms.Button();
+            this.btbVerify = new System.Windows.Forms.Button();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.fileToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.newToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.loadToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtInput = new System.Windows.Forms.TextBox();
             this.contextMenuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbSim)).BeginInit();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // contextMenuStrip1
@@ -67,45 +74,46 @@
             // newToolStripMenuItem
             // 
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
             this.newToolStripMenuItem.Text = "New";
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
             this.saveToolStripMenuItem.Text = "Save";
             // 
             // loadToolStripMenuItem
             // 
             this.loadToolStripMenuItem.Name = "loadToolStripMenuItem";
-            this.loadToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.loadToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
             this.loadToolStripMenuItem.Text = "Load";
             // 
-            // textBox1
+            // txtScript
             // 
-            this.textBox1.Location = new System.Drawing.Point(12, 87);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(442, 478);
-            this.textBox1.TabIndex = 1;
+            this.txtScript.Location = new System.Drawing.Point(12, 87);
+            this.txtScript.Multiline = true;
+            this.txtScript.Name = "txtScript";
+            this.txtScript.Size = new System.Drawing.Size(442, 478);
+            this.txtScript.TabIndex = 1;
             // 
-            // pictureBox1
+            // pbSim
             // 
-            this.pictureBox1.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.pictureBox1.Location = new System.Drawing.Point(496, 87);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(464, 478);
-            this.pictureBox1.TabIndex = 2;
-            this.pictureBox1.TabStop = false;
+            this.pbSim.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.pbSim.Location = new System.Drawing.Point(496, 87);
+            this.pbSim.Name = "pbSim";
+            this.pbSim.Size = new System.Drawing.Size(464, 478);
+            this.pbSim.TabIndex = 2;
+            this.pbSim.TabStop = false;
             // 
-            // textBox2
+            // txtConsole
             // 
-            this.textBox2.Location = new System.Drawing.Point(12, 590);
-            this.textBox2.Multiline = true;
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(948, 47);
-            this.textBox2.TabIndex = 3;
+            this.txtConsole.Location = new System.Drawing.Point(12, 590);
+            this.txtConsole.Multiline = true;
+            this.txtConsole.Name = "txtConsole";
+            this.txtConsole.ReadOnly = true;
+            this.txtConsole.Size = new System.Drawing.Size(948, 100);
+            this.txtConsole.TabIndex = 3;
             // 
             // label1
             // 
@@ -136,42 +144,95 @@
             this.label3.Text = "Console ";
             this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
-            // button1
+            // btbExec
             // 
-            this.button1.Location = new System.Drawing.Point(966, 590);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 47);
-            this.button1.TabIndex = 7;
-            this.button1.Text = "Exec";
-            this.button1.UseVisualStyleBackColor = true;
+            this.btbExec.Location = new System.Drawing.Point(965, 669);
+            this.btbExec.Name = "btbExec";
+            this.btbExec.Size = new System.Drawing.Size(75, 47);
+            this.btbExec.TabIndex = 7;
+            this.btbExec.Text = "Exec";
+            this.btbExec.UseVisualStyleBackColor = true;
+            this.btbExec.Click += new System.EventHandler(this.btbExec_Click);
             // 
-            // button2
+            // btbVerify
             // 
-            this.button2.Location = new System.Drawing.Point(341, 63);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(113, 23);
-            this.button2.TabIndex = 8;
-            this.button2.Text = "Verify script";
-            this.button2.UseVisualStyleBackColor = true;
+            this.btbVerify.Location = new System.Drawing.Point(341, 63);
+            this.btbVerify.Name = "btbVerify";
+            this.btbVerify.Size = new System.Drawing.Size(113, 23);
+            this.btbVerify.TabIndex = 8;
+            this.btbVerify.Text = "Verify script";
+            this.btbVerify.UseVisualStyleBackColor = true;
+            this.btbVerify.Click += new System.EventHandler(this.btbVerify_Click);
+            // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fileToolStripMenuItem1});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(1070, 24);
+            this.menuStrip1.TabIndex = 9;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // fileToolStripMenuItem1
+            // 
+            this.fileToolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.newToolStripMenuItem1,
+            this.loadToolStripMenuItem1,
+            this.saveToolStripMenuItem1});
+            this.fileToolStripMenuItem1.Name = "fileToolStripMenuItem1";
+            this.fileToolStripMenuItem1.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem1.Text = "File";
+            // 
+            // newToolStripMenuItem1
+            // 
+            this.newToolStripMenuItem1.Name = "newToolStripMenuItem1";
+            this.newToolStripMenuItem1.Size = new System.Drawing.Size(100, 22);
+            this.newToolStripMenuItem1.Text = "New";
+            // 
+            // loadToolStripMenuItem1
+            // 
+            this.loadToolStripMenuItem1.Name = "loadToolStripMenuItem1";
+            this.loadToolStripMenuItem1.Size = new System.Drawing.Size(100, 22);
+            this.loadToolStripMenuItem1.Text = "Load";
+            this.loadToolStripMenuItem1.Click += new System.EventHandler(this.loadToolStripMenuItem1_Click);
+            // 
+            // saveToolStripMenuItem1
+            // 
+            this.saveToolStripMenuItem1.Name = "saveToolStripMenuItem1";
+            this.saveToolStripMenuItem1.Size = new System.Drawing.Size(100, 22);
+            this.saveToolStripMenuItem1.Text = "Save";
+            // 
+            // txtInput
+            // 
+            this.txtInput.Location = new System.Drawing.Point(12, 696);
+            this.txtInput.Name = "txtInput";
+            this.txtInput.Size = new System.Drawing.Size(947, 20);
+            this.txtInput.TabIndex = 10;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1047, 643);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
+            this.ClientSize = new System.Drawing.Size(1070, 772);
+            this.Controls.Add(this.txtInput);
+            this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.btbVerify);
+            this.Controls.Add(this.btbExec);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.textBox2);
-            this.Controls.Add(this.pictureBox1);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.txtConsole);
+            this.Controls.Add(this.pbSim);
+            this.Controls.Add(this.txtScript);
+            this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.contextMenuStrip1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbSim)).EndInit();
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -184,14 +245,20 @@
         private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loadToolStripMenuItem;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.TextBox txtScript;
+        private System.Windows.Forms.PictureBox pbSim;
+        private System.Windows.Forms.TextBox txtConsole;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button btbExec;
+        private System.Windows.Forms.Button btbVerify;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem loadToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem1;
+        private System.Windows.Forms.TextBox txtInput;
     }
 }
 

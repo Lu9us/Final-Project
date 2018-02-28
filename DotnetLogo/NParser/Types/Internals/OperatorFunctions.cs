@@ -10,6 +10,12 @@ namespace NParser.Types.Internals
     {
         private static Random r = new Random(DateTime.Now.Day + DateTime.Now.Month + DateTime.Now.Year);
         private static SystemState sys = SystemState.internalState;
+
+        public static void ResetSystemState()
+        {
+           sys = SystemState.internalState;
+        }
+
         public static NetLogoObject let(NetLogoObject o, NetLogoObject n)
         {
             if (sys.exeStack.Peek().isAsk)
@@ -37,7 +43,7 @@ namespace NParser.Types.Internals
         }
         public static NetLogoObject show(NetLogoObject o, NetLogoObject d)
         {
-            Console.WriteLine(o);
+            Console.WriteLine(o.value);
             return new NetLogoObject() { ptrID = "NULLPTR" };
         }
         public static NetLogoObject set(NetLogoObject o, NetLogoObject n)

@@ -9,6 +9,7 @@ to setup
 	  ;; varying the color makes the bees easier to follow with your eyes
   ask patches  [
   set chemical 0
+  set p-color "Red"
   ]
   reset-ticks
 end
@@ -24,7 +25,7 @@ to go
     diffuse chemical 0.1
     ask patches [
       set chemical chemical * 0.90       ;; evaporate chemical
-      set pcolor "grey"
+      set pcolor "Red"
     ]
   ]
   tick

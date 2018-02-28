@@ -53,7 +53,7 @@ namespace NParser.Runtime
                 }
                 else if (s.StartsWith("color."))
                 {
-                    return new Colour() { value = s };
+                    return new NSColour() { value = s };
                 }
                 else if (char.IsLetter(s[0]))
                 {

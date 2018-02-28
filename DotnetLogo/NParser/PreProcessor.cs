@@ -35,6 +35,16 @@ namespace NParser
         {
             s = st;
         }
+        internal void SetData(string[] data)
+        {
+            this.data = data;
+            PC = 0;
+            for (int i = 0; i < data.Length; i++)
+            {
+               data[i] = data[i].Replace('\n', ' ');
+                data[i] = data[i].Trim();
+            }
+        }
         public void LoadFile(string fileName)
         {
             try
@@ -51,7 +61,7 @@ namespace NParser
         {
             if (data != null && PC < data.Length)
             {
-                string line = data[PC];
+                string line = data[PC].Replace('\n',' ');
                 line = line.TrimStart();
                 string FirstStatment = "";
                 try { FirstStatment = line.Substring(0, line.IndexOf(' ')); }
