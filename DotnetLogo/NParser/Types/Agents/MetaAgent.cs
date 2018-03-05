@@ -16,8 +16,11 @@ namespace NParser.Types.Agents
             properties.AddProperty("Y", new Integer());
             properties.protectedType.Add("X", typeof(Integer));
             properties.protectedType.Add("Y", typeof(Integer));
-           
+            value = "MetaAgent";
         }
-
+        public override string ToString()
+        {
+            return "Agent "+ID;
+        }
     }
 }

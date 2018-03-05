@@ -28,7 +28,7 @@ namespace NParser.Types
             }
             catch (Exception e)
             {
-                throw new RTException(name + " PROPERTY NOT FOUND");
+                return null;
             }
 
         }

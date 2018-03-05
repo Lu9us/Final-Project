@@ -26,7 +26,7 @@ namespace NParser.Types
 
             foreach (KeyValuePair<string, NetLogoObject> par in param)
             {
-                s += par.Key + "    " + par.Value.ToString();
+                s += par.Key + "    " + par.ToString();
                 s += Environment.NewLine;
             }
             foreach (KeyValuePair<string, NetLogoObject> par in locals)

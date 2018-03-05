@@ -111,6 +111,25 @@ namespace NParser.Runtime
             }
         }
 
+        public void set(string s, NetLogoObject val)
+        {
+            if (exeStack.Peek().isAsk)
+            {
+                MetaAgent m = (MetaAgent)exeStack.Peek().param["Agent"];
+                if (m.properties.GetProperty(s) != null)
+                {
+                m.properties.SetProperty(s,val);
+                }
+                else if (patches[m.x, m.y] != null)
+                {
+                    patches[m.x, m.y].properties.SetProperty(s,val);
+                }
+
+
+            }
+
+        }
+
         public NetLogoObject Get(string s)
         {
             if (exeStack.Peek().param.ContainsKey(s))
@@ -124,6 +143,20 @@ namespace NParser.Runtime
             else if (globals.ContainsKey(s))
             {
                 return globals[s];
+            }
+            if (exeStack.Peek().isAsk)
+            {
+                MetaAgent m = (MetaAgent)exeStack.Peek().param["Agent"];
+                if (m.properties.GetProperty(s) != null)
+                {
+                    return (NetLogoObject)m.properties.GetProperty(s);
+                }
+                else if (patches[m.x, m.y] != null)
+                {
+                    return (NetLogoObject)patches[m.x, m.y].properties.GetProperty(s);
+                }
+
+
             }
             return null;
         }
@@ -151,7 +184,7 @@ namespace NParser.Runtime
         internal Dictionary<string,Function> registeredFunctions = new Dictionary<string, Function>();
         internal Stack<StackFrame> exeStack = new Stack<StackFrame>();
         internal Dictionary<string, NetLogoObject> globals = new Dictionary<string, NetLogoObject>();
-        internal Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+        public Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
         public void AddFunction(Function function)
         {
             registeredFunctions.Add(function.name, function);

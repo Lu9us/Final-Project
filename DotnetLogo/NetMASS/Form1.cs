@@ -73,6 +73,13 @@ namespace NetMASS
                 Bitmap b = changeColour(new Bitmap(img), Color.FromName(((NSString)p.properties.GetProperty("p-color")).val.Replace('\"',' ').Trim()));
                 g.DrawImage(b, new PointF(p.x*img.Width, p.y*img.Height));
             }
+            img = Image.FromFile("Images/Agent.png");
+            foreach (Agent a in es.sys.agents.Values)
+            {
+                Bitmap b = changeColour(new Bitmap(img), Color.FromName(((NSString)a.properties.GetProperty("color")).val.Replace('\"', ' ').Trim()));
+                g.DrawImage(b, new PointF(a.x*img.Width , a.y * img.Height));
+
+            }
         }
 
         private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)

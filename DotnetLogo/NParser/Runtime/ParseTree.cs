@@ -80,21 +80,71 @@ namespace NParser.Runtime.DataStructs
             {
                 tempNode = new TreeNode(opearatorStack.Pop());
                 tempNode.parent = parent;
-                tempNode.left = new TreeNode(tokenStack.Pop());
-                tempNode.left.parent = tempNode;
+
+                if (tokenStack.Count > 0&&opearatorStack.Count<1)
+                {
+                    tempNode.left = new TreeNode(tokenStack.Pop());
+                    tempNode.left.parent = tempNode;
+                }
+                if (opearatorStack.Count > 0)
+                {
+                    tempNode.left = new TreeNode(opearatorStack.Pop());
+                    tempNode.left.parent = tempNode;
+                    if (opearatorStack.Count < 1)
+                    {
+                        if (tokenStack.Count == 3)
+                        {
+
+                            tempNode.right = new TreeNode(tokenStack.Pop());
+                            tempNode.right.parent = tempNode;
+                        }
+
+                        if (tempNode.left.left == null&& tokenStack.Count > 0)
+                        {
+
+                            tempNode.left.left = new TreeNode(tokenStack.Pop());
+                            tempNode.left.left.parent = tempNode.left;
+                        }
+                        if (tokenStack.Count > 0&& tempNode.left.right == null)
+                        {
+                         
+                            tempNode.left.right = new TreeNode(tokenStack.Pop());
+                            tempNode.left.right.parent = tempNode.left;
+                        }
+                        if (tokenStack.Count >0)
+                        {
+
+                            tempNode.right = new TreeNode(tokenStack.Pop());
+                            tempNode.right.parent = tempNode;
+                        }
+                    }
+                    else
+                    {
+                        if (tokenStack.Count > 0)
+                        {
+                           
+                            tempNode.left.right = new TreeNode(tokenStack.Pop());
+                            tempNode.left.right.parent = tempNode.left;
+                        }
+                        tempNode.left.left = NodeGen(tokenStack, opearatorStack, tempNode.left);
+                       
+                    }
+
+                }
+
             }
             else if (tokenStack.Count > 0)
             {
                 tempNode = new TreeNode(tokenStack.Pop());
                 tempNode.parent = parent;
-                if (tokenStack.Count > 0)
+                if (tokenStack.Count > 0&&tempNode.left == null)
                 {
                     tempNode.left = new TreeNode(tokenStack.Pop());
                     tempNode.left.parent = tempNode;
                 }
             
             }
-            if (opearatorStack.Count > 0 && tokenStack.Count < 1)
+            else if (opearatorStack.Count > 0 && tokenStack.Count < 1)
             {
                 tempNode = new TreeNode(opearatorStack.Pop());
                 tempNode.parent = parent;
@@ -116,7 +166,14 @@ namespace NParser.Runtime.DataStructs
             }
             else if (tokenStack.Count > 0 && opearatorStack.Count == 0)
             {
-                tempNode.right = TokenNodeGen(tokenStack, tempNode);
+                if (IsOperator(tempNode.left))
+                {
+                    tempNode.left.right = TokenNodeGen(tokenStack, tempNode);
+                }
+                else
+                {
+                    tempNode.right = TokenNodeGen(tokenStack, tempNode);
+                }
             }
             else if (tokenStack.Count > 0)
             {
@@ -147,7 +204,14 @@ namespace NParser.Runtime.DataStructs
 
         public bool IsOperator(TreeNode n)
         {
-            return operators.Contains(n.data);
+            if (n != null)
+            {
+                return operators.Contains(n.data);
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public  void printTree(TreeNode n, int level, int x)

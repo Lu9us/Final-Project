@@ -12,9 +12,16 @@ namespace NParser.Types.Agents
         {
             ID = IDCOUNT;
             IDCOUNT++;
+            properties.AddProperty("rotation", new Number() { value = 0 });
             properties.AddProperty("color", new NSString());
             properties.protectedType.Add("color", typeof(NSString));
+            properties.protectedType.Add("rotation", typeof(Number));
             properties.properties["color"] = new NSString() { val = "black" };
+            value = "Agent";
+        }
+        public override string ToString()
+        {
+            return "Agent " + ID;
         }
     }
 }

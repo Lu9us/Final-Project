@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using System.Reflection;
 namespace NParser.Types.Internals
 {
     /// <summary>
@@ -92,10 +92,38 @@ namespace NParser.Types.Internals
 
         static OperatorTable()
         {
+
+           Type t = typeof(OperatorFunctions);
+            Type methodPtr = typeof(opFunct<,,>);
+
+           var v = t.GetMethods();
+            foreach (var method in v)
+            {
+                if (method.IsStatic)
+                {
+                 var paramArray=   method.GetParameters();
+                 var returnid = method.ReturnParameter;
+                 var operatorAtt =   method.GetCustomAttributes().Where(a=>a is OperatorName);
+                    foreach (var op in operatorAtt)
+                    {
+                        Type constructedmethodPtr = methodPtr.MakeGenericType(new[] { paramArray[0].ParameterType, paramArray[1].ParameterType, returnid.ParameterType });
+                        OpPair o = new OpPair(paramArray[0].ParameterType, paramArray[1].ParameterType, returnid.ParameterType, ((OperatorName)op).name, ((OperatorName)op).cast);
+                        Delegate created = Delegate.CreateDelegate(constructedmethodPtr,method);
+                        opTable.Add(o, created);
+                    }
+                   
+                }
+
+            }
+           
+
+/*
             opFunct<NetLogoObject, NetLogoObject, NetLogoObject> temp = OperatorFunctions.let;
             opTable.Add(new OpPair(typeof(NetLogoObject), typeof(NetLogoObject), typeof(NetLogoObject), "let",false),temp);
             temp = OperatorFunctions.report;
             opTable.Add(new OpPair(typeof(NetLogoObject), typeof(NetLogoObject), typeof(NetLogoObject), "report", false), temp);
+            temp = OperatorFunctions.tick;
+            opTable.Add(new OpPair(typeof(NetLogoObject), typeof(NetLogoObject), typeof(NetLogoObject), "tick", false), temp);
             temp = OperatorFunctions.set;
             opTable.Add(new OpPair(typeof(NetLogoObject), typeof(NetLogoObject), typeof(NetLogoObject), "set", false), temp);
             temp = OperatorFunctions.show;
@@ -117,6 +145,7 @@ namespace NParser.Types.Internals
             opTable.Add(new OpPair(typeof(NetLogoObject), typeof(NetLogoObject), typeof(Number), "random-xcor", false), tempN);
             tempN = OperatorFunctions.random;
             opTable.Add(new OpPair(typeof(NetLogoObject), typeof(NetLogoObject), typeof(Number), "random-ycor", false), tempN);
+            */
         }
 
     }

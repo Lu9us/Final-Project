@@ -12,13 +12,13 @@ namespace NParser.Runtime
     public class ExecutionEngine
     {
         public SystemState sys = new SystemState();
-        public PreProcessor p;
-        private bool SkipToJump = false;
+        public PreProcessor preProccessor;
+        private bool skipToJump = false;
       
         public ExecutionEngine()
         {
 
-            p = new PreProcessor(sys);
+            preProccessor = new PreProcessor(sys);
             SystemState.internalState = sys;
             StackFrame t = new StackFrame("INT", new Dictionary<string, NetLogoObject>());
             OperatorFunctions.ResetSystemState();
@@ -28,16 +28,16 @@ namespace NParser.Runtime
 
         public void Load(string path)
         {
-            p.LoadFile(path);
-            while (!p.fileEnd)
-                p.FirstPassRead();
+            preProccessor.LoadFile(path);
+            while (!preProccessor.fileEnd)
+                preProccessor.FirstPassRead();
 
         }
         public void Load(string[] data)
         {
-            p.SetData(data);
-            while (!p.fileEnd)
-                p.FirstPassRead();
+            preProccessor.SetData(data);
+            while (!preProccessor.fileEnd)
+                preProccessor.FirstPassRead();
 
 
         }
@@ -68,7 +68,7 @@ namespace NParser.Runtime
         {
             
 
-            SkipToJump = false;
+            skipToJump = false;
             if (n == null)
             {
                 return;
@@ -93,7 +93,7 @@ namespace NParser.Runtime
             if (n.data.StartsWith("create-"))
             {
                 Function f = sys.registeredFunctions[sys.exeStack.Peek().FunctionName];
-
+                StackFrame oldFrame = null;
                 int i = sys.exeStack.Peek().pc + 1;
                 AgentCreationStatement ac = f.agentData.First(a => a.startOffset == i && a.breed == n.data.Split('-')[1]);
                 int count = int.Parse((string)sys.Assign(ac.countVar).value.ToString());
@@ -103,18 +103,22 @@ namespace NParser.Runtime
                     l.Add(new Agent());
                 }
                 sys.exeStack.Peek().pc =+ ac.lines.Count()+1;
-                StackFrame s = new StackFrame("NEWAGENT " + ac.breed, new Dictionary<string, NetLogoObject>() { { "Agents", new AgentSet(l) } }) { isAsk = true };
-
-                sys.exeStack.Push(s);
-                ParseTree pt;
-                while (s.pc < ac.lines.Length && !sys.BreakExecution)
+                for (int k = 0; k < l.Count; k++)
                 {
-                    pt = new ParseTree(ac.lines[s.pc]);
+                    StackFrame s = new StackFrame("NEWAGENT " + ac.breed, new Dictionary<string, NetLogoObject>() { { "Agent",l[k] } }) { isAsk = true };
+
+                    sys.exeStack.Push(s);
+                    ParseTree pt;
+                    while (s.pc < ac.lines.Length && !sys.BreakExecution)
+                    {
+                        pt = new ParseTree(ac.lines[s.pc]);
 
 
 
-                    ExecuteTree(pt);
-                    s.pc++;
+                        ExecuteTree(pt);
+                        s.pc++;
+                    }
+                  oldFrame = sys.exeStack.Pop();
                 }
                 foreach (MetaAgent a in l)
                 {
@@ -124,12 +128,12 @@ namespace NParser.Runtime
 #if DEBUG
                 //  sys.PrintCallStack();
 #endif
-                StackFrame oldFrame = sys.exeStack.Pop();
+               
                 //sys.exeStack.Peek().pc += oldFrame.pc;
 #if DEBUG
                 Console.WriteLine(oldFrame.ToString());
 #endif
-                SkipToJump = true;
+                skipToJump = true;
             }
             else if (n.data.StartsWith("ask"))
             {
@@ -146,14 +150,17 @@ namespace NParser.Runtime
                 Ask a =  f.askData.First(ab => ab.name == name && sys.exeStack.Peek().pc == ab.pcOffset|| sys.exeStack.Peek().pc + 1 == ab.pcOffset);
                 List<MetaAgent> param = sys.GetBreed(name);
 
-                StackFrame ff = new StackFrame(name + "-ask", new Dictionary<string, NetLogoObject> { { "Agents", new AgentSet(param) } }) {isAsk = true };
-                ExecFrame(ff, a, n);
-                SkipToJump = true;
+                for (int i = 0; i < param.Count; i++)
+                {
+                    StackFrame ff = new StackFrame(name + "-ask", new Dictionary<string, NetLogoObject> { { "Agent", param[i] } }) { isAsk = true };
+                    ExecFrame(ff, a, n);
+                }
+                skipToJump = true;
 
 
 
             }
-            if (!SkipToJump)
+            if (!skipToJump)
             {
                 Exec(n.parent, t);
             }
@@ -178,10 +185,10 @@ namespace NParser.Runtime
 
             if (n.left != null && (sys.registeredFunctions.ContainsKey(n.left.data) || isOp(n.left)) && n.right != null)
             {
-                TreeNode ns = ReadToLeaf(n.left);
-                ns.left = new TreeNode(n.right.data);
-                ns.left.parent = ns;
-                n.right = null;
+                //TreeNode ns = ReadToLeaf(n.left);
+                //ns.left = new TreeNode(n.right.data);
+                //ns.left.parent = ns;
+                //n.right = null;
                 if (isOp(n.left))
                 {
                     ExecOp(n.left);
@@ -365,8 +372,19 @@ namespace NParser.Runtime
         public void ExecOp(TreeNode n)
         {
             NetLogoObject obj = null;
+            ParseTree t = new ParseTree("");
             if (nodeFull(n))
             {
+                if (t.IsOperator(n.left))
+                {
+                    ExecOp(n.left);
+
+                }
+                if (t.IsOperator(n.right))
+                {
+                    ExecOp(n.left);
+
+                }
                 obj = OperatorTable.Call<NetLogoObject>(sys.Assign(n.left.data, false), sys.Assign(n.right.data, false), n.data);
             }
             else if (n.left != null)

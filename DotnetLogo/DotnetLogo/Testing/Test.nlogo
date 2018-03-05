@@ -16,18 +16,18 @@ end
 
 to go
   ask turtles [
-    rt 4 * chemical
-    fd 1 + ((chemical ^ 2) / 60)
+    ;rt 4 * chemical
+  ;  fd 1 + chemical * 2 / 60
     set chemical chemical + 2     
   ]
   ;; for speed, only run the patches every 10th tick
-  if ticks mod 10 = 0 [
-    diffuse chemical 0.1
+  ;if ticks mod 10 = 0 [
+   ; diffuse chemical 0.1
     ask patches [
       set chemical chemical * 0.90       ;; evaporate chemical
-      set pcolor "Red"
+      set p-color "Yellow"
     ]
-  ]
+  ;]
   tick
 end
 
