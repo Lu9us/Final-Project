@@ -72,14 +72,17 @@ namespace NParser.Types.Internals
             if (sys.exeStack.Peek().isAsk)
             {
                 var v = (MetaAgent)sys.exeStack.Peek().param["Agent"];
-                try
+
+                if (o.ptrID != null)
                 {
                     sys.set((string)o.value, n);
                 }
-                catch (Exception e)
+                else
                 {
                     sys.set((string)n.value, o);
                 }
+
+
                 return new NetLogoObject() { ptrID = "NULLPTR" };
             }
             else

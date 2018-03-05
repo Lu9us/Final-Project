@@ -23,8 +23,14 @@ namespace NParser.Types
         {
             try
             {
-
-                return properties[name];
+                if (properties.ContainsKey(name))
+                {
+                    return properties[name];
+                }
+                else
+                {
+                    return null;
+                }
             }
             catch (Exception e)
             {

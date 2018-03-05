@@ -48,6 +48,8 @@
             this.loadToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.txtInput = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.lblTicks = new System.Windows.Forms.Label();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbSim)).BeginInit();
             this.menuStrip1.SuspendLayout();
@@ -210,11 +212,31 @@
             this.txtInput.Size = new System.Drawing.Size(947, 20);
             this.txtInput.TabIndex = 10;
             // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(574, 13);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(36, 13);
+            this.label4.TabIndex = 11;
+            this.label4.Text = "Ticks:";
+            // 
+            // lblTicks
+            // 
+            this.lblTicks.AutoSize = true;
+            this.lblTicks.Location = new System.Drawing.Point(617, 13);
+            this.lblTicks.Name = "lblTicks";
+            this.lblTicks.Size = new System.Drawing.Size(35, 13);
+            this.lblTicks.TabIndex = 12;
+            this.lblTicks.Text = "label5";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1070, 772);
+            this.Controls.Add(this.lblTicks);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.txtInput);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.btbVerify);
@@ -227,7 +249,7 @@
             this.Controls.Add(this.txtScript);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "NetMASS";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.contextMenuStrip1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pbSim)).EndInit();
@@ -259,6 +281,8 @@
         private System.Windows.Forms.ToolStripMenuItem loadToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem1;
         private System.Windows.Forms.TextBox txtInput;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label lblTicks;
     }
 }
 

@@ -10,6 +10,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -18,10 +19,14 @@ namespace NetMASS
     public partial class Form1 : Form
     {
         private ExecutionEngine es = new ExecutionEngine();
+        private Dictionary<string, Bitmap> spriteMap = new Dictionary<string, Bitmap>();
+        private string[,] colorMap;
+        private bool exeThread = false;
         bool scriptVerified = false;
         public Form1()
         {
             InitializeComponent();
+            colorMap = new string[50, 50];
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -29,29 +34,40 @@ namespace NetMASS
             txtScript.ScrollBars = ScrollBars.Vertical;
             txtConsole.ScrollBars = ScrollBars.Vertical;
             pbSim.Paint += AgentDraw;
+            spriteMap.Add("Agent", new Bitmap(Image.FromFile("Images/Agent.png")));
+            spriteMap.Add("Tile", new Bitmap(Image.FromFile("Images/Tile.png")));
             Console.SetOut(new ConsoleToControl(txtConsole));
 
         }
 
-        private Bitmap changeColour(Bitmap src, Color c)
+        private Bitmap changeColour(Bitmap src, Color c,string agentType)
         {
             Color actualC;
-            Bitmap b = new Bitmap(src.Width, src.Height);
-            for (int i = 0; i < src.Width; i++)
+            Bitmap b;
+            if (!spriteMap.ContainsKey(agentType+c.Name))
             {
-                for (int j = 0; j < src.Height; j++)
+                 b = new Bitmap(src.Width, src.Height);
+                for (int i = 0; i < src.Width; i++)
                 {
-                    actualC = src.GetPixel(i, j);
-                    if (actualC.A > 150)
+                    for (int j = 0; j < src.Height; j++)
                     {
-                        b.SetPixel(i, j, c);
+                        actualC = src.GetPixel(i, j);
+                        if (actualC.A > 150)
+                        {
+                            b.SetPixel(i, j, c);
+                        }
+                        else
+                        {
+                            b.SetPixel(i, j, actualC);
+                        }
                     }
-                    else
-                    {
-                        b.SetPixel(i, j, actualC);
-                    }
-                }
 
+                }
+                spriteMap.Add(agentType + c.Name, b);
+            }
+            else
+            {
+                b = spriteMap[agentType + c.Name];
             }
 
 
@@ -62,21 +78,25 @@ namespace NetMASS
         private void AgentDraw(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            Image img = Image.FromFile("Images/Tile.png");
+            
 
             int i = 0;
             int j = 0;
-           
-
+            Bitmap img = spriteMap["Tile"];
+            string color;
             foreach (Patch p in es.sys.patches)
             {
-                Bitmap b = changeColour(new Bitmap(img), Color.FromName(((NSString)p.properties.GetProperty("p-color")).val.Replace('\"',' ').Trim()));
-                g.DrawImage(b, new PointF(p.x*img.Width, p.y*img.Height));
+              
+                    Bitmap b = changeColour(img, Color.FromName(((NSString)p.properties.GetProperty("p-color")).val.Replace('\"', ' ').Trim()), "Patch");
+                    colorMap[p.x, p.y] = ((NSString)p.properties.GetProperty("p-color")).val.Replace('\"', ' ');
+                    g.DrawImage(b, new PointF(p.x * img.Width, p.y * img.Height));
+                
             }
-            img = Image.FromFile("Images/Agent.png");
+            img = spriteMap["Agent"];
             foreach (Agent a in es.sys.agents.Values)
             {
-                Bitmap b = changeColour(new Bitmap(img), Color.FromName(((NSString)a.properties.GetProperty("color")).val.Replace('\"', ' ').Trim()));
+                
+                Bitmap b = changeColour(img, Color.FromName(((NSString)a.properties.GetProperty("color")).val.Replace('\"', ' ').Trim()),"Agent");
                 g.DrawImage(b, new PointF(a.x*img.Width , a.y * img.Height));
 
             }
@@ -99,6 +119,7 @@ namespace NetMASS
 
         private void loadToolStripMenuItem1_Click(object sender, EventArgs e)
         {
+            exeThread = false;
             OpenFileDialog d = new OpenFileDialog();
             d.Multiselect = false;
             if (d.ShowDialog() == DialogResult.OK)
@@ -118,7 +139,7 @@ namespace NetMASS
         private void btbVerify_Click(object sender, EventArgs e)
         {
 
-
+            exeThread = false;
             if (!string.IsNullOrEmpty(txtScript.Text)||!string.IsNullOrWhiteSpace(txtScript.Text))
             {
                 txtConsole.Clear();
@@ -132,9 +153,58 @@ namespace NetMASS
 
         private void btbExec_Click(object sender, EventArgs e)
         {
-            ParseTree t = new ParseTree(txtInput.Text);
-            es.ExecuteTree(t);
-            pbSim.Refresh();
+            exeThread = false;
+            string input;
+            string paramt;
+            
+            if (txtInput.Text.Contains(" "))
+            {
+                input = txtInput.Text.Split(' ')[0];
+                paramt = txtInput.Text.Split(' ')[1];
+                if (paramt == "-exeinfinite")
+                {
+                    Thread t = new Thread(() =>
+                    {
+                        while (exeThread)
+                        {
+                            ParseTree ts = new ParseTree(txtInput.Text);
+                            es.ExecuteTree(ts);
+                            lblTicks.Text = ((Number)es.sys.Get("ticks")).val.ToString();
+                            if (!InvokeRequired)
+                            {
+                                pbSim.Refresh();
+                            }
+                            else
+                            {
+                                Invoke(new Action(()=> { pbSim.Refresh(); }));
+                            }
+                        }
+                    });
+                    exeThread = true;
+                    
+                        t.Start();
+                        
+
+                    
+
+                }
+                else
+                {
+                    ParseTree t = new ParseTree(txtInput.Text);
+                    es.ExecuteTree(t);
+                    lblTicks.Text = ((Number)es.sys.Get("ticks")).val.ToString();
+                    pbSim.Refresh();
+
+                }
+            }
+            else
+            {
+                ParseTree t = new ParseTree(txtInput.Text);
+                es.ExecuteTree(t);
+                lblTicks.Text = ((Number)es.sys.Get("ticks")).val.ToString();
+                pbSim.Refresh();
+            }
+           
         }
     }
 }

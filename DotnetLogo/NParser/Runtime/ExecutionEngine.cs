@@ -139,14 +139,14 @@ namespace NParser.Runtime
             {
                 string name;
                 Function f = sys.registeredFunctions[sys.exeStack.Peek().FunctionName];
-                try
-                {
-                   name  = n.data.Split('-')[1];
-                }
-                catch (Exception e)
-                {
+               // try
+               // {
+                //   name  = n.data.Split('-')[1];
+                //}
+               // catch (Exception e)
+               // {
                      name = n.left.data;
-                }
+                //}
                 Ask a =  f.askData.First(ab => ab.name == name && sys.exeStack.Peek().pc == ab.pcOffset|| sys.exeStack.Peek().pc + 1 == ab.pcOffset);
                 List<MetaAgent> param = sys.GetBreed(name);
 
@@ -155,6 +155,7 @@ namespace NParser.Runtime
                     StackFrame ff = new StackFrame(name + "-ask", new Dictionary<string, NetLogoObject> { { "Agent", param[i] } }) { isAsk = true };
                     ExecFrame(ff, a, n);
                 }
+                sys.exeStack.Peek().pc += a.pcOffset;
                 skipToJump = true;
 
 
@@ -296,7 +297,7 @@ namespace NParser.Runtime
 
 
             StackFrame oldFrame = sys.exeStack.Pop();
-            sys.exeStack.Peek().pc += oldFrame.pc+1;
+            sys.exeStack.Peek().pc = oldFrame.pc+1+f.pcOffset;
 #if DEBUG
             Console.WriteLine(oldFrame.ToString());
 #endif
