@@ -156,37 +156,47 @@ namespace NetMASS
             exeThread = false;
             string input;
             string paramt;
-            
-            if (txtInput.Text.Contains(" "))
+            if (scriptVerified)
             {
-                input = txtInput.Text.Split(' ')[0];
-                paramt = txtInput.Text.Split(' ')[1];
-                if (paramt == "-exeinfinite")
+                if (txtInput.Text.Contains(" "))
                 {
-                    Thread t = new Thread(() =>
+                    input = txtInput.Text.Split(' ')[0];
+                    paramt = txtInput.Text.Split(' ')[1];
+                    if (paramt == "-exeinfinite")
                     {
-                        while (exeThread)
+                        Thread t = new Thread(() =>
                         {
-                            ParseTree ts = new ParseTree(txtInput.Text);
-                            es.ExecuteTree(ts);
-                            lblTicks.Text = ((Number)es.sys.Get("ticks")).val.ToString();
-                            if (!InvokeRequired)
+                            while (exeThread)
                             {
-                                pbSim.Refresh();
+                                ParseTree ts = new ParseTree(input);
+                                es.ExecuteTree(ts);
+                                lblTicks.Text = ((Number)es.sys.Get("ticks")).val.ToString();
+                                if (!InvokeRequired)
+                                {
+                                    pbSim.Refresh();
+                                }
+                                else
+                                {
+                                    Invoke(new Action(() => { pbSim.Refresh(); }));
+                                }
                             }
-                            else
-                            {
-                                Invoke(new Action(()=> { pbSim.Refresh(); }));
-                            }
-                        }
-                    });
-                    exeThread = true;
-                    
+                        });
+                        exeThread = true;
+
                         t.Start();
-                        
 
-                    
 
+
+
+                    }
+                    else
+                    {
+                        ParseTree t = new ParseTree(txtInput.Text);
+                        es.ExecuteTree(t);
+                        lblTicks.Text = ((Number)es.sys.Get("ticks")).val.ToString();
+                        pbSim.Refresh();
+
+                    }
                 }
                 else
                 {
@@ -194,17 +204,9 @@ namespace NetMASS
                     es.ExecuteTree(t);
                     lblTicks.Text = ((Number)es.sys.Get("ticks")).val.ToString();
                     pbSim.Refresh();
-
                 }
+
             }
-            else
-            {
-                ParseTree t = new ParseTree(txtInput.Text);
-                es.ExecuteTree(t);
-                lblTicks.Text = ((Number)es.sys.Get("ticks")).val.ToString();
-                pbSim.Refresh();
-            }
-           
         }
     }
 }

@@ -42,8 +42,8 @@ namespace NParser.Runtime.DataStructs
 
             foreach (string data in tokens.Reverse())
             {
-               
-                    if (!string.IsNullOrWhiteSpace(data))
+
+                    if (!string.IsNullOrWhiteSpace(data) && !delims.Contains(data.ToCharArray()[0]))
                     {
                         if (operators.Contains(data))
                         {

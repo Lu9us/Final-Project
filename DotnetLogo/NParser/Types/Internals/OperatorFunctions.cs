@@ -22,21 +22,47 @@ namespace NParser.Types.Internals
         {
             sys = SystemState.internalState;
         }
+        [OperatorName(cast = false, name = "if")]
+        public static Boolean IF(Boolean o, NetLogoObject n)
+        {
+
+            return o;
+
+        }
+        [OperatorName(cast  = false,name ="=")]
+        public static Boolean equal(NetLogoObject o, NetLogoObject n)
+        {
+            if (o.value == o.value)
+            {
+                return new Boolean() { val = true };
+            }
+            else
+            {
+                return new Boolean() { val = false };
+            }
+        }
+        [OperatorName]
+        public static Number mod(Number n, Number o)
+        {
+
+            return new Number() { val = n.val % o.val };
+
+        }
 
         [OperatorName(cast = false, name = "tick")]
         public static NetLogoObject tick(NetLogoObject o, NetLogoObject n)
         {
 
-            sys.globals["ticks"].value = ((int)sys.globals["ticks"].value) + 1;
+            sys.globals["ticks"].value = ((float)sys.globals["ticks"].value) + 1;
             return new NetLogoObject() { ptrID = "NULLPTR" };
         }
 
         [OperatorName(cast = false, name = "let")]
         public static NetLogoObject let(NetLogoObject o, NetLogoObject n)
         {
-            if (sys.exeStack.Peek().isAsk)
+            if (sys.GetCurrentFrame().isAsk)
             {
-                var v = (MetaAgent)sys.exeStack.Peek().param["Agent"];
+                var v = (MetaAgent)sys.GetCurrentFrame().param["Agent"];
 
                 v.properties.AddProperty((string)o.value, n);
 
@@ -45,7 +71,7 @@ namespace NParser.Types.Internals
             else
             {
                 //  var v = sys.Assign(n.value.ToString());
-                sys.exeStack.Peek().locals.Add((string)o.value, n);
+                sys.GetCurrentFrame().locals.Add((string)o.value, n);
             }
             return new NetLogoObject() { ptrID = o.ptrID };
         }
@@ -53,7 +79,7 @@ namespace NParser.Types.Internals
         [OperatorName(cast = false, name = "report")]
         public static NetLogoObject report(NetLogoObject o, NetLogoObject d)
         {
-            sys.exeStack.Peek().ReportValue = o;
+            sys.GetCurrentFrame().ReportValue = o;
             sys.BreakExecution = true;
             return new NetLogoObject() { ptrID = o.value.ToString() };
 
@@ -69,9 +95,9 @@ namespace NParser.Types.Internals
         [OperatorName(cast = false, name = "set")]
         public static NetLogoObject set(NetLogoObject o, NetLogoObject n)
         {
-            if (sys.exeStack.Peek().isAsk)
+            if (sys.GetCurrentFrame().isAsk)
             {
-                var v = (MetaAgent)sys.exeStack.Peek().param["Agent"];
+                var v = (MetaAgent)sys.GetCurrentFrame().param["Agent"];
 
                 if (o.ptrID != null)
                 {
@@ -87,7 +113,7 @@ namespace NParser.Types.Internals
             }
             else
             {
-                sys.exeStack.Peek().locals[(string)o.value] = n;
+                sys.GetCurrentFrame().locals[(string)o.value] = n;
             }
 
             return new NetLogoObject() { ptrID = o.ptrID };
@@ -116,7 +142,7 @@ namespace NParser.Types.Internals
         [OperatorName(name = "setxy")]
         public static NetLogoObject setxy(Number x, Number y)
         {
-            if (sys.exeStack.Peek().isAsk)
+            if (sys.GetCurrentFrame().isAsk)
             {
                 MetaAgent m = (MetaAgent)sys.Get("Agent");
 
@@ -150,7 +176,7 @@ namespace NParser.Types.Internals
         public static NetLogoObject forward(Number o, NetLogoObject n)
         {
 
-            if (sys.exeStack.Peek().isAsk)
+            if (sys.GetCurrentFrame().isAsk)
             {
                 MetaAgent m = (MetaAgent)sys.Get("Agent");
                 Integer x = new Integer();
@@ -183,17 +209,11 @@ namespace NParser.Types.Internals
         public static NetLogoObject rotate(Number o, NetLogoObject n)
         {
 
-            if (sys.exeStack.Peek().isAsk)
+            if (sys.GetCurrentFrame().isAsk)
             {
                 MetaAgent m = (MetaAgent)sys.Get("Agent");
 
                 m.properties.SetProperty("rotation", new Number { val = o.val%360});
-
-               
-             
-
-
-
 
             }
             return new NetLogoObject() { ptrID = "NULLPTR" };

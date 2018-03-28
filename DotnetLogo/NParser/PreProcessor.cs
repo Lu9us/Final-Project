@@ -12,29 +12,42 @@ using static NParser.Runtime.FlowControll;
 
 namespace NParser
 {
-    //TODO: parse post line comments 
+/// <summary>
+///Pre-proccessor class runs before the main parser and sepereates out
+///flow controll and functions
+/// </summary>
     public class PreProcessor
     {
 
 
         SystemState s;
+        
+        //program counter
         int PC = 0;
+
         public bool fileEnd = false;
-        string[] data;
         public bool skipBadLines = false;
+
+        string[] data;
         string[] declarativeKeywords = { "extensions", "breed", "globals" };
         string[] agentDeclarativeKeywords = { "-own" };
         string[] functionDeclarativeKeywords = { "to" };
         string[] flowControllKeywords = { "if","elseif"};
+
         string askKeyword = "ask";
         string createKeyword = "create-";
-          char[] delims = new[] { ' ', '[', ']', ',' };
+
+        char[] delims = new[] { ' ', '[', ']', ',' };
 
 
         public PreProcessor(SystemState st)
         {
             s = st;
         }
+        /// <summary>
+        /// set the internal line buffer for the pre processor
+        /// </summary>
+        /// <param name="data">lines of code</param>
         internal void SetData(string[] data)
         {
             this.data = data;
@@ -45,6 +58,10 @@ namespace NParser
                 data[i] = data[i].Trim();
             }
         }
+        /// <summary>
+        /// Load a file into the line buffer buffer 
+        /// </summary>
+        /// <param name="fileName"></param>
         public void LoadFile(string fileName)
         {
             try
@@ -56,16 +73,21 @@ namespace NParser
                 Console.WriteLine("file not found");
             }
         }
-
+        /// <summary>
+        /// back bone function for the preprocessor 
+        /// </summary>
         public void FirstPassRead()
         {
             if (data != null && PC < data.Length)
             {
+                //get rid of any stray new line chars
                 string line = data[PC].Replace('\n',' ');
                 line = line.TrimStart();
                 string FirstStatment = "";
+
                 try { FirstStatment = line.Substring(0, line.IndexOf(' ')); }
                 catch (Exception e) { Console.WriteLine("short line"); };
+
                 Console.WriteLine(line);
                 Console.WriteLine("first statement: " + FirstStatment);
                 try
@@ -114,7 +136,10 @@ namespace NParser
                 fileEnd = true;
             }
         }
-
+        /// <summary>
+        /// construct breeds and add additional paramaters to existing breeds
+        /// </summary>
+        /// <param name="line"></param>
         public void AgentDeclaritive(string line)
         {
             try
@@ -163,6 +188,13 @@ namespace NParser
                 throw new RTException("malformed expression on line: " +PC);
             }
         }
+        /// <summary>
+        /// Constructs a function to create agents 
+        /// </summary>
+        /// <param name="line">start line</param>
+        /// <param name="tpc">program counter</param>
+        /// <param name="offset">overall offset</param>
+        /// <returns></returns>
         public AgentCreationStatement AgentCreate(string line, int tpc,int offset)
         {
 
@@ -170,20 +202,23 @@ namespace NParser
             int spc = tpc;
 
             string token = "";
+
             try
             {
                 string[] lineData = StringUtilities.split(new[] { '-',' ' }, this.data[spc]);
+
                 List<FlowControll> fc = new List<FlowControll>();
-                bool report = false;
-                bool param = false;
+
                 string name = lineData[2];
                 string count = lineData[3];
+
                 Stack<string> stack = new Stack<string>();
 
 
                 do
                 {
                     lineData = StringUtilities.split(delims, this.data[tempPC]);
+
                     foreach (string td in lineData)
                     {
 
@@ -207,6 +242,7 @@ namespace NParser
                     //token = this.data[tempPC];
 
                 }
+
                 while (stack.Count > 0);
                 string[] lines = new string[tempPC - 1 - (spc + 1)];
                 for (int i = spc + 1; i < tempPC - 1; i++)
@@ -229,7 +265,13 @@ namespace NParser
 
 
         }
-
+        /// <summary>
+        /// Constructs a function to track agent behaviour
+        /// </summary>
+        /// <param name="line">start line</param>
+        /// <param name="tpc">program counter</param>
+        /// <param name="offset">overall offset</param>
+        /// <returns></returns>
         public Ask AskDeclarative(string line,int tpc,int offset)
         {
 
@@ -240,21 +282,23 @@ namespace NParser
             try
             {
                 string[] lineData = StringUtilities.split(delims, this.data[spc]);
+
                 List<FlowControll> fc = new List<FlowControll>();
                 List<string> paramaters = new List<string>();
+
                 bool report = false;
-                bool param = false;
+               
                 string name = lineData[1];
+
                 Stack<string> stack = new Stack<string>();
                 
 
                 do
                 {
                     lineData = StringUtilities.split(delims, this.data[tempPC]);
+
                     foreach (string td in lineData)
                     {
-
-
 
                         if (flowControllKeywords.Any(a => td.Equals(a)))
                         {
@@ -271,19 +315,22 @@ namespace NParser
                         }
                     }
                     tempPC++;
-                    //token = this.data[tempPC];
 
                 }
                 while (stack.Count > 0);
+
                 string[] lines = new string[tempPC - 1 - (spc + 1) ];
+
                 for (int i = spc+1; i < tempPC-1; i++)
                 {
                     lines[i - (spc + 1)] = this.data[i];
 
                 }
 
-                Ask f = new Ask(lines, spc + 1, name) { pcOffset = offset, paramaters = paramaters, Report = report };
+                Ask f = new Ask(lines, spc , name) { pcOffset = offset, paramaters = paramaters, Report = report };
+
                 f.flowControls = fc;
+
                 return f;
             }
             catch (Exception e)
@@ -296,7 +343,10 @@ namespace NParser
 
 
         }
-
+/// <summary>
+/// creates a function data structure
+/// </summary>
+/// <param name="line">Inital Line</param>
         public void FunctionDeclarative(string line)
         {
             int tempPC = PC + 1;
@@ -305,13 +355,17 @@ namespace NParser
             try
             {
                 string[] lineData = StringUtilities.split(delims, this.data[PC]);
+
                 List<FlowControll> fc = new List<FlowControll>();
                 List<string> paramaters = new List<string>();
                 List<Ask> ak = new List<Ask>();
                 List<AgentCreationStatement> createAgents = new List<AgentCreationStatement>();
+
                 bool report = false;
                 bool param = false;
+
                 string name = lineData[1];
+
                 if (lineData[0] == "to-report")
                 {
                     report = true;
@@ -341,7 +395,7 @@ namespace NParser
                         { paramaters.Add(td); }
                         if (flowControllKeywords.Any(a => td.Equals(a)))
                         {
-                          fc.Add(FlowControl(tempPC, this.data[tempPC]));
+                          fc.Add(FlowControl(tempPC+1, this.data[tempPC]));
                         }
                         if (td.Equals(askKeyword))
                         {
@@ -384,48 +438,68 @@ namespace NParser
 
         }
 
-        public FlowControll FlowControl(int pc,string line)
+        public FlowControll FlowControl(int tPC,string line)
         {
             line = line.Trim();
+            int tempPC = tPC;
             string type = line.Substring(0,line.IndexOf(' '));
             string fullLine = line.Split(new[] { '\n','['})[0];
-
+            List<FlowControll> fc = new List<FlowControll>();
+            List<Ask> ak = new List<Ask>();
+            List<AgentCreationStatement> createAgents = new List<AgentCreationStatement>();
             Stack<string> expected = new Stack<string>();
 
             string[] splitTokens;
             string tempLine;
 
-            expected.Push("[");
+            expected.Push("]");
 
             JumpType jump = JumpType.Succes;
 
             FlowControll f = new FlowControll(type);
 
-            int blockStart = 0;
+            int blockStart = tempPC;
             int blockEnd = 0;
             
             while (expected.Count > 0)
             {
-                if (expected.Count > 0 && pc >= data.Length)
+                if (expected.Count > 0 && tempPC >= data.Length)
                 {
                     throw new RTException("Expected " + expected.Peek() + "got eof");
                 }
 
-                tempLine = data[pc];
+                tempLine = data[tempPC];
                 splitTokens = StringUtilities.split(delims,tempLine);
                 
                 foreach (string token in splitTokens)
                 {
                     if (!string.IsNullOrWhiteSpace(token))
                     {
+
+                        if (flowControllKeywords.Any(a => token.Equals(a)))
+                        {
+                            fc.Add(FlowControl(tempPC, this.data[tempPC]));
+                        }
+                        if (token.Equals(askKeyword))
+                        {
+                            ak.Add(AskDeclarative(this.data[tempPC], tempPC, tempPC - tPC));
+                        }
+                        if (token.StartsWith(createKeyword))
+                        {
+                            createAgents.Add(AgentCreate(this.data[tempPC], tempPC, tempPC - tPC));
+                        }
+
+
+
+
                         if (token == "[" && expected.Peek() == "[" && expected.Count == 1)
                         {
                             expected.Pop();
                             expected.Push("]");
-                            blockStart = pc;
+                            blockStart = tempPC;
 
                         }
-                        else if (token == "[" && expected.Count > 1)
+                        else if (token == "[" && expected.Count >= 1)
                         {
                             expected.Push("]");
                         }
@@ -433,19 +507,30 @@ namespace NParser
 
                         if (token == "]" && expected.Peek() == "]" && expected.Count == 1)
                         {
-                            blockEnd = pc;
+                            blockEnd = tempPC;
                             expected.Pop();
+                         
+                            List<string> lines = new List<string>();
+                            for (int i = blockStart + 1; i < blockEnd; i++)
+                            {
+
+                                lines.Add(data[i]);
+
+                            }
+
+                            Block b = new Block(blockStart-(PC+1),lines.ToArray(),jump);
+                            b.flowControls = fc;
+                            b.askData = ak;
+                            b.agentData = createAgents;
+                            b.end = blockEnd;
+                            f.JumpTable.Add(jump, b);
+                            f.conditionalLine = fullLine;
                             if (type == "ifelse" && jump == JumpType.Succes)
                             {
                                 expected.Push("[");
                                 jump = JumpType.Fail;
 
                             }
-                            Block b = new Block();
-                            b.start = blockStart;
-                            b.end = blockEnd;
-                            f.JumpTable.Add(jump, b);
-                            f.conditionalLine = fullLine;
                             break;
 
                         }
@@ -456,7 +541,7 @@ namespace NParser
                     }
 
                 }
-                pc++;
+                tempPC++;
               
             }
 

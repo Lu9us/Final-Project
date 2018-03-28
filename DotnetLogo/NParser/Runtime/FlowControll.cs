@@ -13,13 +13,32 @@ namespace NParser.Runtime
             Fail
 
         }
+     
 
-        public struct Block
+        public class Block: Function
         {
             public int start;
             public int end;
 
+            public Block(int start,string [] s,JumpType jt): base(s,start,jt.ToString())
+            {
+                this.start = start;
+                this.end = end;
+            }
         }
+
+        internal int GetTotalJump()
+        {
+            int i = 0;
+            foreach (Block b in JumpTable.Values)
+            {
+                i += b.body.Length;
+            }
+            return i;
+
+        }
+
+
 
         internal string type;
         public string conditionalLine;

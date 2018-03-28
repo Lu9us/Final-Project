@@ -2,6 +2,7 @@
 using NParser.Types.Agents;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -45,8 +46,14 @@ namespace NParser.Runtime
 
         public NetLogoObject Assign(string s,bool getValFromRef = true)
         {
+            bool b = false;
             if (s != null)
             {
+                if (bool.TryParse(s, out b))
+                {
+                    return new Types.Boolean() { val = b };
+
+                }
                 if (char.IsDigit(s[0]))
                 {
                     return new Number() { val = float.Parse(s) };
@@ -75,6 +82,20 @@ namespace NParser.Runtime
             return new NetLogoObject() { ptrID = s };
 
         }
+
+        internal StackFrame GetCurrentFrame()
+        {
+            if (exeStack.Peek().anonymousFunction)
+            {
+                return GetLowerStackFunction();
+            }
+            else
+            {
+                return exeStack.Peek();
+            }
+
+        }
+
 
         public List<MetaAgent> GetBreed(string breed)
         {
@@ -113,9 +134,9 @@ namespace NParser.Runtime
 
         public void set(string s, NetLogoObject val)
         {
-            if (exeStack.Peek().isAsk)
+            if (GetCurrentFrame().isAsk)
             {
-                MetaAgent m = (MetaAgent)exeStack.Peek().param["Agent"];
+                MetaAgent m = (MetaAgent)GetCurrentFrame().param["Agent"];
                 if (m.properties.GetProperty(s) != null)
                 {
                 m.properties.SetProperty(s,val);
@@ -130,23 +151,31 @@ namespace NParser.Runtime
 
         }
 
+        internal StackFrame GetLowerStackFunction()
+        {
+          StackFrame s =  exeStack.Pop();
+          StackFrame ret = GetCurrentFrame();
+          exeStack.Push(s);
+          return ret;
+        }
+
         public NetLogoObject Get(string s)
         {
-            if (exeStack.Peek().param.ContainsKey(s))
+            if (GetCurrentFrame().param.ContainsKey(s))
             {
-                return exeStack.Peek().param[s];
+                return GetCurrentFrame().param[s];
             }
-            else if (exeStack.Peek().locals.ContainsKey(s))
+            else if (GetCurrentFrame().locals.ContainsKey(s))
             {
-                return exeStack.Peek().locals[s];
+                return GetCurrentFrame().locals[s];
             }
             else if (globals.ContainsKey(s))
             {
                 return globals[s];
             }
-            if (exeStack.Peek().isAsk)
+            if (GetCurrentFrame().isAsk)
             {
-                MetaAgent m = (MetaAgent)exeStack.Peek().param["Agent"];
+                MetaAgent m = (MetaAgent)GetCurrentFrame().param["Agent"];
                 if (m.properties.GetProperty(s) != null)
                 {
                     return (NetLogoObject)m.properties.GetProperty(s);
@@ -163,20 +192,29 @@ namespace NParser.Runtime
         public void PrintCallStack()
         {
             StackFrame f;
-            Queue<StackFrame> tempQueue = new Queue<StackFrame>();
+            List<StackFrame> tempQueue = new List<StackFrame>();
+             var fh =  File.Create("StackTrace.txt");
+            fh.Close();
             while (exeStack.Count > 0)
             {
                 f = exeStack.Pop();
-                tempQueue.Enqueue(f);
-                Console.WriteLine(f.ToString());
+                tempQueue.Add(f);
+                File.AppendAllText("StackTrace.txt", "***************" + exeStack.Count + "***************");
+                File.AppendAllText("StackTrace.txt", Environment.NewLine);
+                File.AppendAllText("StackTrace.txt", f.ToString());
+                File.AppendAllText("StackTrace.txt", Environment.NewLine);
+                File.AppendAllText("StackTrace.txt", "*************** END ***************");
+                File.AppendAllText("StackTrace.txt", Environment.NewLine);
             }
-
-            while (tempQueue.Count > 0)
+            tempQueue.Reverse();
+            foreach (StackFrame s in tempQueue )
             {
-                exeStack.Push(tempQueue.Dequeue());
-
+                exeStack.Push(s);
             }
-            exeStack = new Stack<StackFrame>( exeStack.Reverse());
+                
+
+            
+           //exeStack = new Stack<StackFrame>( exeStack.Reverse());
 
         }
 

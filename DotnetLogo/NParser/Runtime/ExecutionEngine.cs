@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static NParser.Runtime.FlowControll;
 
 namespace NParser.Runtime
 {
@@ -44,9 +45,9 @@ namespace NParser.Runtime
 
         public void ExecuteTree(ParseTree t)
         {
-            if (sys.exeStack.Peek().FunctionName == "INT")
+            if (sys.GetCurrentFrame().FunctionName == "INT")
             {
-                sys.exeStack.Peek().pc = 0;
+                sys.GetCurrentFrame().pc = 0;
             }
             TreeNode n = ReadToLeaf(t.root);
             if (t.root.left == null && t.root.right == null&& n == t.root)
@@ -89,12 +90,12 @@ namespace NParser.Runtime
                 ExecOp(n);
 
             }
-          
+
             if (n.data.StartsWith("create-"))
             {
-                Function f = sys.registeredFunctions[sys.exeStack.Peek().FunctionName];
+                Function f = sys.registeredFunctions[sys.GetCurrentFrame().FunctionName];
                 StackFrame oldFrame = null;
-                int i = sys.exeStack.Peek().pc + 1;
+                int i = sys.GetCurrentFrame().pc + 1;
                 AgentCreationStatement ac = f.agentData.First(a => a.startOffset == i && a.breed == n.data.Split('-')[1]);
                 int count = int.Parse((string)sys.Assign(ac.countVar).value.ToString());
                 List<MetaAgent> l = new List<MetaAgent>();
@@ -102,10 +103,10 @@ namespace NParser.Runtime
                 {
                     l.Add(new Agent());
                 }
-                sys.exeStack.Peek().pc =+ ac.lines.Count()+1;
+                sys.GetCurrentFrame().pc = +ac.lines.Count() + 1;
                 for (int k = 0; k < l.Count; k++)
                 {
-                    StackFrame s = new StackFrame("NEWAGENT " + ac.breed, new Dictionary<string, NetLogoObject>() { { "Agent",l[k] } }) { isAsk = true };
+                    StackFrame s = new StackFrame("NEWAGENT " + ac.breed, new Dictionary<string, NetLogoObject>() { { "Agent", l[k] } }) { isAsk = true };
 
                     sys.exeStack.Push(s);
                     ParseTree pt;
@@ -118,7 +119,7 @@ namespace NParser.Runtime
                         ExecuteTree(pt);
                         s.pc++;
                     }
-                  oldFrame = sys.exeStack.Pop();
+                    oldFrame = sys.exeStack.Pop();
                 }
                 foreach (MetaAgent a in l)
                 {
@@ -128,8 +129,8 @@ namespace NParser.Runtime
 #if DEBUG
                 //  sys.PrintCallStack();
 #endif
-               
-                //sys.exeStack.Peek().pc += oldFrame.pc;
+
+                //sys.GetCurrentFrame().pc += oldFrame.pc;
 #if DEBUG
                 Console.WriteLine(oldFrame.ToString());
 #endif
@@ -137,17 +138,21 @@ namespace NParser.Runtime
             }
             else if (n.data.StartsWith("ask"))
             {
+                Function f = null;
                 string name;
-                Function f = sys.registeredFunctions[sys.exeStack.Peek().FunctionName];
-               // try
-               // {
-                //   name  = n.data.Split('-')[1];
-                //}
-               // catch (Exception e)
-               // {
-                     name = n.left.data;
-                //}
-                Ask a =  f.askData.First(ab => ab.name == name && sys.exeStack.Peek().pc == ab.pcOffset|| sys.exeStack.Peek().pc + 1 == ab.pcOffset);
+                if (sys.GetCurrentFrame().flowControl)
+                {
+                    string[] flowControll = sys.GetCurrentFrame().FunctionName.Split('|');
+                    f = sys.registeredFunctions[flowControll[0]].flowControls.First(fc=>fc.conditionalLine.Contains(flowControll[1])).JumpTable[(JumpType)Enum.Parse(typeof(JumpType), flowControll[2])];
+                }
+                else
+                {
+                   f = sys.registeredFunctions[sys.GetCurrentFrame().FunctionName];
+                }
+                name = n.left.data;
+               
+                Ask a = f.askData.First(ab => ab.name == name && sys.GetCurrentFrame().pc == ab.pcOffset || sys.GetCurrentFrame().pc + 1 == ab.pcOffset);
+
                 List<MetaAgent> param = sys.GetBreed(name);
 
                 for (int i = 0; i < param.Count; i++)
@@ -155,11 +160,38 @@ namespace NParser.Runtime
                     StackFrame ff = new StackFrame(name + "-ask", new Dictionary<string, NetLogoObject> { { "Agent", param[i] } }) { isAsk = true };
                     ExecFrame(ff, a, n);
                 }
-                sys.exeStack.Peek().pc += a.pcOffset;
+                sys.GetCurrentFrame().pc += a.pcOffset;
                 skipToJump = true;
 
 
 
+            }
+            else if (n.data.StartsWith("if")||n.data.StartsWith("elseif"))
+            {
+                Function f = sys.registeredFunctions[sys.GetCurrentFrame().FunctionName];
+                string line = n.parent.data.Replace('[', ' ');
+                FlowControll fc = f.flowControls.First(a =>line.Contains(a.conditionalLine));
+               
+                if (bool.Parse(n.left.data))
+                {
+                    StackFrame sf = new StackFrame(f.name + "|" + fc.conditionalLine+"|"+FlowControll.JumpType.Succes, sys.GetCurrentFrame().param);
+                    sf.anonymousFunction = false;
+                    sf.flowControl = true;
+                    sf.isAsk = sys.GetCurrentFrame().isAsk;
+                    ExecFrame(sf, fc.JumpTable[FlowControll.JumpType.Succes], n);
+                }
+                else if (fc.type == "elseif")
+                {
+                    StackFrame sf = new StackFrame(f.name + "|" + fc.conditionalLine + "|" + FlowControll.JumpType.Fail, sys.GetCurrentFrame().param);
+                    sf.anonymousFunction = false;
+                    sf.flowControl = true;
+                    sf.isAsk = sys.GetCurrentFrame().isAsk;
+                    ExecFrame(sf, fc.JumpTable[FlowControll.JumpType.Fail], n);
+                }
+                //  ParseTree pt = new ParseTree(fc.conditionalLine);
+                //   ExecuteTree(pt);
+                sys.GetCurrentFrame().pc += fc.GetTotalJump();
+                skipToJump = true;
             }
             if (!skipToJump)
             {
@@ -248,6 +280,7 @@ namespace NParser.Runtime
             fFrame.pc = 0;
             sys.exeStack.Push(fFrame);
             ParseTree pt;
+            sys.PrintCallStack();
             while (fFrame.pc < f.body.Length && !sys.BreakExecution)
             {
                 pt = new ParseTree(f.body[fFrame.pc]);
@@ -261,10 +294,10 @@ namespace NParser.Runtime
             Console.WriteLine("Execution broken : " + sys.BreakExecution);
 #endif 
 
-            if (f.Report && sys.exeStack.Peek().ReportValue != null)
+            if (f.Report && sys.GetCurrentFrame().ReportValue != null)
             {
                 sys.BreakExecution = false;
-                TreeNode tempNode = new TreeNode(sys.Assign(sys.exeStack.Peek().ReportValue.value.ToString()).value.ToString());
+                TreeNode tempNode = new TreeNode(sys.Assign(sys.GetCurrentFrame().ReportValue.value.ToString()).value.ToString());
                 if (n.parent.left == n)
                 {
                     n.parent.left = tempNode;
@@ -297,7 +330,7 @@ namespace NParser.Runtime
 
 
             StackFrame oldFrame = sys.exeStack.Pop();
-            sys.exeStack.Peek().pc = oldFrame.pc+1+f.pcOffset;
+            sys.GetCurrentFrame().pc = oldFrame.pc+1+f.pcOffset;
 #if DEBUG
             Console.WriteLine(oldFrame.ToString());
 #endif

@@ -17,18 +17,24 @@ namespace NParser.Types
         internal bool Report;
         internal NetLogoObject ReportValue;
         internal bool isAsk;
+        internal bool flowControl;
         internal int pc;
+        internal bool anonymousFunction = false;
 
+      
         public override string ToString()
         {
             String s = "[";
             s += FunctionName + Environment.NewLine;
-
+            s += "Paramaters [";
+            s +=  Environment.NewLine;
             foreach (KeyValuePair<string, NetLogoObject> par in param)
             {
                 s += par.Key + "    " + par.ToString();
                 s += Environment.NewLine;
             }
+            s +=  Environment.NewLine;
+            s += "]";
             foreach (KeyValuePair<string, NetLogoObject> par in locals)
             {
                 s += par.Key + "    " + par.Value.ToString();
