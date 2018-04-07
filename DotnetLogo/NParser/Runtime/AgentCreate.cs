@@ -4,11 +4,15 @@ using System.Text;
 
 namespace NParser.Runtime
 {
-   public class AgentCreationStatement
+   public class AgentCreationStatement:Function
     {
-        public int startOffset;
-        public string[] lines;
+       
         public string countVar;
         public string breed;
+
+        public AgentCreationStatement(string[] body, int offset, string name) : base(body, offset, name)
+        {
+           
+        }
     }
 }

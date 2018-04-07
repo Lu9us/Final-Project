@@ -29,10 +29,10 @@ namespace NParser.Types.Internals
             return o;
 
         }
-        [OperatorName(cast  = false,name ="=")]
+        [OperatorName(cast  = true,name ="=")]
         public static Boolean equal(NetLogoObject o, NetLogoObject n)
         {
-            if (o.value == o.value)
+            if (o.value.Equals( n.value))
             {
                 return new Boolean() { val = true };
             }
@@ -41,7 +41,20 @@ namespace NParser.Types.Internals
                 return new Boolean() { val = false };
             }
         }
-        [OperatorName]
+        [OperatorName(cast = true, name = ">")]
+        public static Boolean over(Number o, Number n)
+        {
+            if (o.val > n.val)
+            {
+                return new Boolean() { val = true };
+            }
+            else
+            {
+                return new Boolean() { val = false };
+            }
+        }
+
+        [OperatorName(cast = true, name = "%")]
         public static Number mod(Number n, Number o)
         {
 
@@ -60,20 +73,18 @@ namespace NParser.Types.Internals
         [OperatorName(cast = false, name = "let")]
         public static NetLogoObject let(NetLogoObject o, NetLogoObject n)
         {
-            if (sys.GetCurrentFrame().isAsk)
-            {
-                var v = (MetaAgent)sys.GetCurrentFrame().param["Agent"];
-
-                v.properties.AddProperty((string)o.value, n);
-
-                return new NetLogoObject() { ptrID = "NULLPTR" };
-            }
-            else
+            
+            if (o.ptrID != null)
             {
                 //  var v = sys.Assign(n.value.ToString());
                 sys.GetCurrentFrame().locals.Add((string)o.value, n);
             }
-            return new NetLogoObject() { ptrID = o.ptrID };
+            else
+            {
+                sys.GetCurrentFrame().locals.Add((string)n.value, o);
+            }
+            
+            return new NetLogoObject() { ptrID = "NULLPTR" };
         }
 
         [OperatorName(cast = false, name = "report")]
@@ -85,7 +96,7 @@ namespace NParser.Types.Internals
 
         }
 
-        [OperatorName(name = "show")]
+        [OperatorName(name = "show",cast = true)]
         public static NetLogoObject show(NetLogoObject o, NetLogoObject d)
         {
             Console.WriteLine(o.value);
@@ -101,10 +112,12 @@ namespace NParser.Types.Internals
 
                 if (o.ptrID != null)
                 {
+                    n = sys.Assign(n.value.ToString(), true);
                     sys.set((string)o.value, n);
                 }
                 else
                 {
+                    o = sys.Assign(o.value.ToString(), true);
                     sys.set((string)n.value, o);
                 }
 
@@ -183,8 +196,8 @@ namespace NParser.Types.Internals
                 x.val = (int)(o.val * Math.Sin(((Number)m.properties.GetProperty("rotation")).val));
                 Integer y = new Integer();
                 y.val = (int)(o.val * Math.Cos(((Number)m.properties.GetProperty("rotation")).val));
-                x.val = m.y + x.val;
-                y.val = m.y + x.val;
+                x.val = m.x + x.val;
+                y.val = m.y + y.val;
                 if ((x.val > 0) && (x.val < 49))
                 {
                     m.properties.SetProperty("X", new Integer() { value = x.value });

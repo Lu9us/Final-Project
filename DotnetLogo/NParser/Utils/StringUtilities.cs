@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using NParser.Types;
 
 namespace NParser.Utils
 {
@@ -71,6 +72,7 @@ namespace NParser.Utils
 #if DEBUG
                Debugger.Break();
 #endif
+                throw new RTException("Exception occured splitting string: "+e.Message);
                 return null;
             }
         }

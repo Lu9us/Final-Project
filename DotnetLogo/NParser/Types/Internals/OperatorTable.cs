@@ -79,8 +79,11 @@ namespace NParser.Types.Internals
             {
 
                 try
-                {                 
+                {
+
+
                     return (t3)d.DynamicInvoke(new[] { a, b });
+
                 }
                 catch (Exception e)
                 {
@@ -154,3 +157,4 @@ namespace NParser.Types.Internals
     
 
 }
+

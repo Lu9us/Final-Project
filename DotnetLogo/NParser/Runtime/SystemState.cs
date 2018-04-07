@@ -12,6 +12,7 @@ namespace NParser.Runtime
     {
         internal static SystemState internalState;
         public bool BreakExecution = false;
+        public bool ExceptionThrown = false;
         public SystemState()
         {
             patches = new Patch[50,50];
@@ -47,39 +48,51 @@ namespace NParser.Runtime
         public NetLogoObject Assign(string s,bool getValFromRef = true)
         {
             bool b = false;
-            if (s != null)
+            try
             {
-                if (bool.TryParse(s, out b))
+                if (s != null)
                 {
-                    return new Types.Boolean() { val = b };
+                    if (bool.TryParse(s, out b))
+                    {
+                        return new Types.Boolean() {val = b};
 
-                }
-                if (char.IsDigit(s[0]))
-                {
-                    return new Number() { val = float.Parse(s) };
-                }
-                else if (s.StartsWith("color."))
-                {
-                    return new NSColour() { value = s };
-                }
-                else if (char.IsLetter(s[0]))
-                {
-                    if (Get(s) != null && getValFromRef)
-                    {
-                        return Assign(GetVal(Get(s)));
-                    }
-                    else
-                    {
-                        return new NetLogoObject() { ptrID = s };
                     }
 
+                    if (char.IsDigit(s[0]))
+                    {
+                        return new Number() {val = float.Parse(s)};
+                    }
+                    else if (s.StartsWith("color."))
+                    {
+                        return new NSColour() {value = s};
+                    }
+                    else if (char.IsLetter(s[0]))
+                    {
+                        if (Get(s) != null && getValFromRef)
+                        {
+                            return Assign(GetVal(Get(s)));
+                        }
+                        else
+                        {
+                            return new NetLogoObject() {ptrID = s};
+                        }
+
+
+                    }
+                    else if (s[0] == '"')
+                    {
+                        return new NSString() {val = s};
+                    }
 
                 }
-                else if (s[0] == '"')
-                { return new NSString() { val = s }; }
-               
+
+                return new NetLogoObject() {ptrID = s};
             }
-            return new NetLogoObject() { ptrID = s };
+            catch (Exception e)
+            {
+                throw new RTException("Type missmatch occured: "+e.Message+Environment.NewLine+exeStack.Peek().ToString());
+                ExceptionThrown = true;
+            }
 
         }
 
@@ -130,6 +143,27 @@ namespace NParser.Runtime
                 //DIRTY HACK TO GET REFRENCES !!
                 return Assign(o.value.ToString()).value.ToString(); ;
             }
+        }
+
+        public StackFrame UnwindAnonFunctions()
+        {
+            List<StackFrame> tempQueue = new List<StackFrame>();
+            StackFrame sff;
+            while (exeStack.Count > 0)
+            {
+                sff = exeStack.Pop();
+                tempQueue.Add(sff);
+                if (registeredFunctions.ContainsKey(sff.FunctionName))
+                {
+                    tempQueue.Reverse();
+                    foreach (StackFrame s in tempQueue)
+                    {
+                        exeStack.Push(s);
+                    }
+                    return sff;
+                }
+            }
+            return null;
         }
 
         public void set(string s, NetLogoObject val)
@@ -193,18 +227,32 @@ namespace NParser.Runtime
         {
             StackFrame f;
             List<StackFrame> tempQueue = new List<StackFrame>();
-             var fh =  File.Create("StackTrace.txt");
+#if StackToFile
+            var fh =  File.Create("StackTrace.txt");
             fh.Close();
+#endif
+            Console.WriteLine("Dumping CallStack");
             while (exeStack.Count > 0)
             {
                 f = exeStack.Pop();
+
                 tempQueue.Add(f);
+#if StackToFile
                 File.AppendAllText("StackTrace.txt", "***************" + exeStack.Count + "***************");
                 File.AppendAllText("StackTrace.txt", Environment.NewLine);
                 File.AppendAllText("StackTrace.txt", f.ToString());
                 File.AppendAllText("StackTrace.txt", Environment.NewLine);
                 File.AppendAllText("StackTrace.txt", "*************** END ***************");
                 File.AppendAllText("StackTrace.txt", Environment.NewLine);
+#else
+               
+               Console.WriteLine( "***************" + exeStack.Count + "***************");
+               Console.WriteLine( Environment.NewLine);
+               Console.WriteLine( f.ToString());
+               Console.WriteLine( Environment.NewLine);
+               Console.WriteLine( "*************** END ***************");
+               Console.WriteLine( Environment.NewLine);
+#endif
             }
             tempQueue.Reverse();
             foreach (StackFrame s in tempQueue )

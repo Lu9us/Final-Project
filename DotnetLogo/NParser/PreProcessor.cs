@@ -128,6 +128,7 @@ namespace NParser
 #if DEBUG
                         Debugger.Break();
 #endif
+      
                     }
                 }
             }
@@ -251,7 +252,7 @@ namespace NParser
 
                 }
 
-                AgentCreationStatement statement = new AgentCreationStatement() {startOffset = offset,lines = lines,breed=name,countVar = count };
+                AgentCreationStatement statement = new AgentCreationStatement(lines,offset, "NEWAGENT " + name) {breed=name,countVar = count };
                
                 return statement;
             }
@@ -302,7 +303,12 @@ namespace NParser
 
                         if (flowControllKeywords.Any(a => td.Equals(a)))
                         {
-                            fc.Add(FlowControl(tempPC - 1, this.data[tempPC - 1]));
+                            FlowControll fcc = FlowControl(tempPC + 1, this.data[tempPC]);
+                            foreach (Block b in fcc.JumpTable.Values)
+                            {
+                                tempPC += b.body.Length;
+                            }
+                            fc.Add(fcc);
                         }
 
                         if (td == "]")
@@ -365,6 +371,24 @@ namespace NParser
                 bool param = false;
 
                 string name = lineData[1];
+                foreach (string td in lineData)
+                {
+
+                    if (lineData.Length > 1 && td == "[" && lineData[1] == name)
+                    {
+                        param = true;
+                    }
+
+                    if (td == "]")
+                    {
+                        param = false;
+                    }
+
+                    if (param && !(td == "[" || td == "]") && !string.IsNullOrEmpty(td))
+                    {
+                        paramaters.Add(td);
+                    }
+                }
 
                 if (lineData[0] == "to-report")
                 {
@@ -383,19 +407,16 @@ namespace NParser
                     foreach (string td in lineData)
                     {
                         
-                        if (td.Length > 1 &&td == "[" && lineData[1] == name)
-                        {
-                            param = true;
-                        }
-                        if (td == "]")
-                        {
-                            param = false;
-                        }
-                        if (param && !(td == "[" || td== "]")&& !string.IsNullOrEmpty(td))
-                        { paramaters.Add(td); }
+                      
                         if (flowControllKeywords.Any(a => td.Equals(a)))
                         {
-                          fc.Add(FlowControl(tempPC+1, this.data[tempPC]));
+                            FlowControll fcc = FlowControl(tempPC + 1, this.data[tempPC]);
+                            foreach (Block b in fcc.JumpTable.Values)
+                            {
+                                tempPC += b.body.Length;
+                            }
+                            
+                          fc.Add(fcc);
                         }
                         if (td.Equals(askKeyword))
                         {
@@ -478,15 +499,26 @@ namespace NParser
 
                         if (flowControllKeywords.Any(a => token.Equals(a)))
                         {
-                            fc.Add(FlowControl(tempPC, this.data[tempPC]));
+
+                            FlowControll flow = FlowControl(tempPC, this.data[tempPC]);
+                            foreach (Block b in flow.JumpTable.Values)
+                            {
+                                tempPC += b.body.Length;
+                            }
+                           
+                            fc.Add(flow);
                         }
                         if (token.Equals(askKeyword))
                         {
-                            ak.Add(AskDeclarative(this.data[tempPC], tempPC, tempPC - tPC));
+                            var ask = AskDeclarative(this.data[tempPC], tempPC, tempPC - tPC);
+                            tempPC += ask.body.Length;
+                            ak.Add(ask);
                         }
                         if (token.StartsWith(createKeyword))
                         {
-                            createAgents.Add(AgentCreate(this.data[tempPC], tempPC, tempPC - tPC));
+                            var agent = AgentCreate(this.data[tempPC], tempPC, tempPC - tPC);
+                            tempPC += agent.body.Length;
+                            createAgents.Add(agent);
                         }
 
 
@@ -511,7 +543,7 @@ namespace NParser
                             expected.Pop();
                          
                             List<string> lines = new List<string>();
-                            for (int i = blockStart + 1; i < blockEnd; i++)
+                            for (int i = blockStart ; i < blockEnd; i++)
                             {
 
                                 lines.Add(data[i]);
