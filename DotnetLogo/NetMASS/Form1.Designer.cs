@@ -104,9 +104,10 @@
             this.pbSim.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.pbSim.Location = new System.Drawing.Point(496, 87);
             this.pbSim.Name = "pbSim";
-            this.pbSim.Size = new System.Drawing.Size(464, 478);
+            this.pbSim.Size = new System.Drawing.Size(598, 478);
             this.pbSim.TabIndex = 2;
             this.pbSim.TabStop = false;
+            this.pbSim.Click += new System.EventHandler(this.pbSim_Click);
             // 
             // txtConsole
             // 
@@ -172,7 +173,7 @@
             this.fileToolStripMenuItem1});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1070, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1139, 24);
             this.menuStrip1.TabIndex = 9;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -191,6 +192,7 @@
             this.newToolStripMenuItem1.Name = "newToolStripMenuItem1";
             this.newToolStripMenuItem1.Size = new System.Drawing.Size(100, 22);
             this.newToolStripMenuItem1.Text = "New";
+            this.newToolStripMenuItem1.Click += new System.EventHandler(this.newToolStripMenuItem1_Click);
             // 
             // loadToolStripMenuItem1
             // 
@@ -204,6 +206,7 @@
             this.saveToolStripMenuItem1.Name = "saveToolStripMenuItem1";
             this.saveToolStripMenuItem1.Size = new System.Drawing.Size(100, 22);
             this.saveToolStripMenuItem1.Text = "Save";
+            this.saveToolStripMenuItem1.Click += new System.EventHandler(this.saveToolStripMenuItem1_Click);
             // 
             // txtInput
             // 
@@ -234,7 +237,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1070, 772);
+            this.ClientSize = new System.Drawing.Size(1139, 749);
             this.Controls.Add(this.lblTicks);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.txtInput);

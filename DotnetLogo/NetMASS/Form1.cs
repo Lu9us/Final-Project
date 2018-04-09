@@ -2,11 +2,13 @@
 using NParser.Runtime.DataStructs;
 using NParser.Types;
 using NParser.Types.Agents;
+using NParser.Performance;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -20,9 +22,11 @@ namespace NetMASS
     {
         private ExecutionEngine es = new ExecutionEngine();
         private Dictionary<string, Bitmap> spriteMap = new Dictionary<string, Bitmap>();
+        private Bitmap data;
         private string[,] colorMap;
         private bool exeThread = false;
         bool scriptVerified = false;
+        Thread t;
         public Form1()
         {
             InitializeComponent();
@@ -74,11 +78,60 @@ namespace NetMASS
             return b;
         }
 
+        private void DrawToBitMap()
+        {
+            Bitmap bitmap = new Bitmap(598, 478,PixelFormat.Format32bppArgb);
+            using (Graphics g = Graphics.FromImage(bitmap))
+            {
+                Bitmap img = spriteMap["Tile"];
+                foreach (Patch p in es.sys.patches)
+                {
+
+                    Bitmap b = changeColour(img, Color.FromName(((NSString)p.properties.GetProperty("p-color")).val.Replace('\"', ' ').Trim()), "Patch");
+                    colorMap[p.x, p.y] = ((NSString)p.properties.GetProperty("p-color")).val.Replace('\"', ' ');
+                    g.DrawImageUnscaled(b, new Point(p.x * img.Width, p.y * img.Height));
+
+                }
+                img = spriteMap["Agent"];
+                foreach (Agent a in es.sys.agents.Values)
+                {
+
+                    Bitmap b = changeColour(img, Color.FromName(((NSString)a.properties.GetProperty("color")).val.Replace('\"', ' ').Trim()), "Agent");
+                    g.DrawImageUnscaled(b, new Point(a.x * img.Width, a.y * img.Height));
+
+                }
+
+                if (data != null)
+                {
+                    data.Dispose();
+                    data = null;
+                }
+
+                data = bitmap;
+            }
+
+        }
 
         private void AgentDraw(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            
+
+#if DRAWBITMAP
+            DrawToBitMap();
+            if (data != null)
+            {
+                try
+                {
+                    g.DrawImageUnscaled(data, new Point(0, 0));
+                }
+                catch (Exception exception)
+                {
+                    Console.WriteLine(exception);
+                    throw;
+                }
+                
+            }
+#else
 
             int i = 0;
             int j = 0;
@@ -100,6 +153,7 @@ namespace NetMASS
                 g.DrawImage(b, new PointF(a.x*img.Width , a.y * img.Height));
 
             }
+#endif
         }
 
         private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
@@ -120,7 +174,9 @@ namespace NetMASS
         private void loadToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             exeThread = false;
+            ThreadWait();
             OpenFileDialog d = new OpenFileDialog();
+            txtScript.Clear();
             d.Multiselect = false;
             if (d.ShowDialog() == DialogResult.OK)
             {
@@ -136,10 +192,27 @@ namespace NetMASS
 
         }
 
-        private void btbVerify_Click(object sender, EventArgs e)
+        private void ThreadWait()
+        {
+            if (t != null)
+            {
+                t.Abort();
+                while (t.IsAlive)
+                {
+                    txtConsole.AppendText("Waiting for thread to end");
+                    txtConsole.AppendText(Environment.NewLine);
+                    Thread.Sleep(100);
+                }
+
+            }
+
+        }
+
+            private void btbVerify_Click(object sender, EventArgs e)
         {
 
             exeThread = false;
+            ThreadWait();
             if (!string.IsNullOrEmpty(txtScript.Text)||!string.IsNullOrWhiteSpace(txtScript.Text))
             {
                 txtConsole.Clear();
@@ -150,10 +223,55 @@ namespace NetMASS
             }
 
         }
+        private void ThreadRuntime(string input)
+        {
+            while (exeThread)
+            {
+#if CALLTRACK || ALLTRACK
+                PeformanceTracker.StartStopWatch(txtInput.Text);
+#endif
+                try
+                {
+                    ParseTree ts = new ParseTree(input);
+                    es.ExecuteTree(ts);
+                }
+                catch (Exception e)
+                {
+                   txtConsole.AppendText(e.Message);
+                   txtConsole.AppendText(Environment.NewLine);
+                   txtConsole.AppendText(e.StackTrace);
+                }
 
+                if (!InvokeRequired)
+                {
+                    lblTicks.Text = ((Number)es.sys.Get("ticks")).val.ToString();
+                }
+                else
+                {
+                    Invoke(new Action(() => { lblTicks.Text = ((Number)es.sys.Get("ticks")).val.ToString(); }));
+                }
+
+
+                if (!InvokeRequired)
+                {
+                    pbSim.Refresh();
+                }
+                else
+                {
+                    Invoke(new Action(() => { pbSim.Refresh(); }));
+                }
+#if CALLTRACK || ALLTRACK
+                PeformanceTracker.Stop(txtInput.Text);
+#endif
+            }
+        }
+
+
+        
         private void btbExec_Click(object sender, EventArgs e)
         {
             exeThread = false;
+            ThreadWait();
             string input;
             string paramt;
             if (scriptVerified)
@@ -162,25 +280,10 @@ namespace NetMASS
                 {
                     input = txtInput.Text.Split(' ')[0];
                     paramt = txtInput.Text.Split(' ')[1];
-                    if (paramt == "-exeinfinite")
+                    if (paramt == "-forever")
                     {
-                        Thread t = new Thread(() =>
-                        {
-                            while (exeThread)
-                            {
-                                ParseTree ts = new ParseTree(input);
-                                es.ExecuteTree(ts);
-                                lblTicks.Text = ((Number)es.sys.Get("ticks")).val.ToString();
-                                if (!InvokeRequired)
-                                {
-                                    pbSim.Refresh();
-                                }
-                                else
-                                {
-                                    Invoke(new Action(() => { pbSim.Refresh(); }));
-                                }
-                            }
-                        });
+                        t = new Thread(() => { ThreadRuntime(input); }); 
+                           
                         exeThread = true;
 
                         t.Start();
@@ -191,22 +294,62 @@ namespace NetMASS
                     }
                     else
                     {
+#if CALLTRACK || ALLTRACK
+            PeformanceTracker.StartStopWatch(txtInput.Text);
+#endif
                         ParseTree t = new ParseTree(txtInput.Text);
                         es.ExecuteTree(t);
                         lblTicks.Text = ((Number)es.sys.Get("ticks")).val.ToString();
                         pbSim.Refresh();
+#if CALLTRACK || ALLTRACK
+                        PeformanceTracker.Stop(txtInput.Text);
+#endif
 
                     }
                 }
                 else
                 {
+#if CALLTRACK || ALLTRACK
+                    PeformanceTracker.StartStopWatch(txtInput.Text);
+#endif
                     ParseTree t = new ParseTree(txtInput.Text);
                     es.ExecuteTree(t);
                     lblTicks.Text = ((Number)es.sys.Get("ticks")).val.ToString();
                     pbSim.Refresh();
+#if CALLTRACK || ALLTRACK
+                    PeformanceTracker.Stop(txtInput.Text);
+#endif
                 }
 
             }
+        }
+
+        private void saveToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            exeThread = false;
+            ThreadWait();
+            SaveFileDialog d = new SaveFileDialog();
+            
+            if (d.ShowDialog() == DialogResult.OK)
+            {
+                File.Create(d.FileName).Close();
+                File.WriteAllText(d.FileName, txtScript.Text);
+            }
+            scriptVerified = false;
+        }
+
+        private void newToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            exeThread = false;
+            ThreadWait();
+            es = new ExecutionEngine();
+            txtScript.Clear();
+            
+        }
+
+        private void pbSim_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
