@@ -21,11 +21,26 @@ namespace NParser.Utils
             {
                 List<string> split = new List<string>();
                 string workingString = new string(data.ToCharArray());
-
+                Queue<string> waiting = new Queue<string>();
                 int i = 0;
+             
 
                 while (i < workingString.Length)
                 {
+                    if (waiting.Empty() && workingString[i].ToString().Equals("\""))
+                    {
+                        waiting.Enqueue("\"");
+
+                    }
+                    else if (waiting.Peek() != null&&waiting.Peek().Equals("\""))
+                    {
+                        i++;
+                        continue;
+                    }
+                    else if (waiting.Peek() != null && waiting.Peek().Equals("\"") && workingString[i].ToString().Equals("\""))
+                    {
+                        waiting.Dequeue();
+                    }
                     if (delims.Contains(workingString[i]))
                     {
 

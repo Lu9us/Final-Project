@@ -18,15 +18,19 @@ to go
   ask turtles [
     rt 4 * chemical
     fd 1 + chemical * 2 / 60
-    set chemical chemical + 2     
+    set chemical chemical + 10     
   ]
   let tickr ticks % 10 
    if tickr = 0 [
    ; diffuse chemical 0.1
+  
     ask patches [
-      set chemical chemical * 0.90   
-	  if chemical > 3 [
+         set chemical chemical * 0.90
+	  elseif chemical > 3 [
       set p-color "Yellow"
+	  ]
+	  [
+	  set p-color "Green"
 	  ]
     ]
   ]

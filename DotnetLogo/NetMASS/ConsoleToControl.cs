@@ -18,12 +18,26 @@ namespace NetMASS
 
         public override void Write(char value)
         {
-            textbox.Text += value;
+            if (textbox.InvokeRequired)
+            {
+                textbox.Invoke(new Action(() => { textbox.Text += value; ; }));
+            }
+            else
+            {
+                textbox.Text += value;
+            }
         }
 
         public override void Write(string value)
         {
-            textbox.Text += value;
+            if (textbox.InvokeRequired)
+            {
+                textbox.Invoke(new Action(() => { textbox.Text += value; ; }));
+            }
+            else
+            {
+                textbox.Text += value;
+            }
         }
 
         public override Encoding Encoding

@@ -34,7 +34,7 @@ namespace NParser.Runtime
             {
                 i += b.body.Length;
             }
-            return i;
+            return i + ((2*JumpTable.Count) - 2 );
 
         }
 

@@ -38,6 +38,7 @@ namespace NetMASS
             txtScript.ScrollBars = ScrollBars.Vertical;
             txtConsole.ScrollBars = ScrollBars.Vertical;
             pbSim.Paint += AgentDraw;
+            pbSim.Size = new Size(600, 600);
             spriteMap.Add("Agent", new Bitmap(Image.FromFile("Images/Agent.png")));
             spriteMap.Add("Tile", new Bitmap(Image.FromFile("Images/Tile.png")));
             Console.SetOut(new ConsoleToControl(txtConsole));
@@ -80,7 +81,7 @@ namespace NetMASS
 
         private void DrawToBitMap()
         {
-            Bitmap bitmap = new Bitmap(598, 478,PixelFormat.Format32bppArgb);
+            Bitmap bitmap = new Bitmap(600, 600, PixelFormat.Format32bppArgb);
             using (Graphics g = Graphics.FromImage(bitmap))
             {
                 Bitmap img = spriteMap["Tile"];
@@ -89,15 +90,19 @@ namespace NetMASS
 
                     Bitmap b = changeColour(img, Color.FromName(((NSString)p.properties.GetProperty("p-color")).val.Replace('\"', ' ').Trim()), "Patch");
                     colorMap[p.x, p.y] = ((NSString)p.properties.GetProperty("p-color")).val.Replace('\"', ' ');
+                   
                     g.DrawImageUnscaled(b, new Point(p.x * img.Width, p.y * img.Height));
 
                 }
                 img = spriteMap["Agent"];
                 foreach (Agent a in es.sys.agents.Values)
                 {
-
+                    float dx =  img.Width / 2;
+                    float dy =  img.Height/ 2;
                     Bitmap b = changeColour(img, Color.FromName(((NSString)a.properties.GetProperty("color")).val.Replace('\"', ' ').Trim()), "Agent");
-                    g.DrawImageUnscaled(b, new Point(a.x * img.Width, a.y * img.Height));
+               
+                    g.DrawImageUnscaled(b, new Point(a.x*img.Width,a.y*img.Height));
+                   
 
                 }
 
@@ -194,15 +199,25 @@ namespace NetMASS
 
         private void ThreadWait()
         {
-            if (t != null)
+            if (t != null && !t.IsAlive)
             {
-                t.Abort();
-                while (t.IsAlive)
+                t = null;
+                if (es.sys.ExceptionThrown)
                 {
-                    txtConsole.AppendText("Waiting for thread to end");
-                    txtConsole.AppendText(Environment.NewLine);
-                    Thread.Sleep(100);
+                    es.sys.ExceptionThrown = false;
                 }
+            }
+            if (t != null && t.IsAlive)
+            {
+                
+                System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
+                es.sys.ExceptionThrown = true;
+                es.sys.BreakExecution = true;
+               
+
+
+                es = new ExecutionEngine();
+                scriptVerified = false;
 
             }
 
@@ -210,13 +225,13 @@ namespace NetMASS
 
             private void btbVerify_Click(object sender, EventArgs e)
         {
-
+           
             exeThread = false;
             ThreadWait();
             if (!string.IsNullOrEmpty(txtScript.Text)||!string.IsNullOrWhiteSpace(txtScript.Text))
             {
                 txtConsole.Clear();
-                es = new ExecutionEngine();
+               
                 es.Load(txtScript.Text.Split(Environment.NewLine.ToCharArray()[0]));
                 scriptVerified = true;
                 pbSim.Refresh();
@@ -227,9 +242,11 @@ namespace NetMASS
         {
             while (exeThread)
             {
+                string text = txtInput.Text;
 #if CALLTRACK || ALLTRACK
-                PeformanceTracker.StartStopWatch(txtInput.Text);
+                PeformanceTracker.StartStopWatch(text);
 #endif
+
                 try
                 {
                     ParseTree ts = new ParseTree(input);
@@ -237,9 +254,9 @@ namespace NetMASS
                 }
                 catch (Exception e)
                 {
-                   txtConsole.AppendText(e.Message);
-                   txtConsole.AppendText(Environment.NewLine);
-                   txtConsole.AppendText(e.StackTrace);
+                  Console.WriteLine(e.Message);
+                    Console.WriteLine(Environment.NewLine);
+                    Console.WriteLine(e.StackTrace);
                 }
 
                 if (!InvokeRequired)
@@ -261,7 +278,7 @@ namespace NetMASS
                     Invoke(new Action(() => { pbSim.Refresh(); }));
                 }
 #if CALLTRACK || ALLTRACK
-                PeformanceTracker.Stop(txtInput.Text);
+                PeformanceTracker.Stop(text);
 #endif
             }
         }
@@ -282,7 +299,7 @@ namespace NetMASS
                     paramt = txtInput.Text.Split(' ')[1];
                     if (paramt == "-forever")
                     {
-                        t = new Thread(() => { ThreadRuntime(input); }); 
+                        t = new Thread(() => { ThreadRuntime(input); }) {Name  = "Runtime Thread" }; 
                            
                         exeThread = true;
 

@@ -96,7 +96,7 @@
             this.txtScript.Location = new System.Drawing.Point(12, 87);
             this.txtScript.Multiline = true;
             this.txtScript.Name = "txtScript";
-            this.txtScript.Size = new System.Drawing.Size(442, 478);
+            this.txtScript.Size = new System.Drawing.Size(458, 578);
             this.txtScript.TabIndex = 1;
             // 
             // pbSim
@@ -104,14 +104,14 @@
             this.pbSim.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.pbSim.Location = new System.Drawing.Point(496, 87);
             this.pbSim.Name = "pbSim";
-            this.pbSim.Size = new System.Drawing.Size(598, 478);
+            this.pbSim.Size = new System.Drawing.Size(600, 600);
             this.pbSim.TabIndex = 2;
             this.pbSim.TabStop = false;
             this.pbSim.Click += new System.EventHandler(this.pbSim_Click);
             // 
             // txtConsole
             // 
-            this.txtConsole.Location = new System.Drawing.Point(12, 590);
+            this.txtConsole.Location = new System.Drawing.Point(16, 692);
             this.txtConsole.Multiline = true;
             this.txtConsole.Name = "txtConsole";
             this.txtConsole.ReadOnly = true;
@@ -140,7 +140,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(16, 571);
+            this.label3.Location = new System.Drawing.Point(20, 673);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(48, 13);
             this.label3.TabIndex = 6;
@@ -149,7 +149,7 @@
             // 
             // btbExec
             // 
-            this.btbExec.Location = new System.Drawing.Point(965, 669);
+            this.btbExec.Location = new System.Drawing.Point(969, 771);
             this.btbExec.Name = "btbExec";
             this.btbExec.Size = new System.Drawing.Size(75, 47);
             this.btbExec.TabIndex = 7;
@@ -210,7 +210,7 @@
             // 
             // txtInput
             // 
-            this.txtInput.Location = new System.Drawing.Point(12, 696);
+            this.txtInput.Location = new System.Drawing.Point(16, 798);
             this.txtInput.Name = "txtInput";
             this.txtInput.Size = new System.Drawing.Size(947, 20);
             this.txtInput.TabIndex = 10;
@@ -218,7 +218,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(574, 13);
+            this.label4.Location = new System.Drawing.Point(602, 68);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(36, 13);
             this.label4.TabIndex = 11;
@@ -227,7 +227,7 @@
             // lblTicks
             // 
             this.lblTicks.AutoSize = true;
-            this.lblTicks.Location = new System.Drawing.Point(617, 13);
+            this.lblTicks.Location = new System.Drawing.Point(644, 68);
             this.lblTicks.Name = "lblTicks";
             this.lblTicks.Size = new System.Drawing.Size(35, 13);
             this.lblTicks.TabIndex = 12;
@@ -237,7 +237,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1139, 749);
+            this.ClientSize = new System.Drawing.Size(1139, 830);
             this.Controls.Add(this.lblTicks);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.txtInput);

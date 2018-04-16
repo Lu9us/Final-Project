@@ -19,7 +19,7 @@ namespace NParser.Types
         internal Dictionary<string, Type> protectedType { get; set; }
         internal List<string> protectedValue { get; set; }
         internal Dictionary<string, OnPropertyChange> Events { get; set; }
-        public object GetProperty(string name)
+        public NetLogoObject GetProperty(string name)
         {
             try
             {

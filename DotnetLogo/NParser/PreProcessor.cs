@@ -85,33 +85,37 @@ namespace NParser
                 line = line.TrimStart();
                 string FirstStatment = "";
 
-                try { FirstStatment = line.Substring(0, line.IndexOf(' ')); }
-                catch (Exception e) { Console.WriteLine("short line"); };
+                try
+                {
+                    FirstStatment = line.Substring(0, line.IndexOf(' '));
+                }
+                catch (Exception e)
+                { //Console.WriteLine("short line"); 
+                };
 
-                Console.WriteLine(line);
-                Console.WriteLine("first statement: " + FirstStatment);
+                
                 try
                 {
                     // maybe switch ?
                     if (line.StartsWith(";"))
                     {
-                        Console.WriteLine("Line Comment skipping");
+                     
                     }
                     else if (declarativeKeywords.Any(a => line.StartsWith(a)))
                     {
-                        Console.WriteLine("Declartive statment");
+                       
                        // Declarative(line);
 
                     }
-                    else if (agentDeclarativeKeywords.Any(a => FirstStatment.Contains(a)))
+                    else if (agentDeclarativeKeywords.Any(a => FirstStatment.StartsWith(a)))
                     {
-                        Console.WriteLine("Agent Declartive statment");
+                        
                         AgentDeclaritive(line);
 
                     }
-                    else if (functionDeclarativeKeywords.Any(a => FirstStatment.Contains(a)))
+                    else if (functionDeclarativeKeywords.Any(a => FirstStatment.StartsWith(a)))
                     {
-                        Console.WriteLine("Function Declartive statment");
+                        
                         FunctionDeclarative(line);
 
                     }
@@ -557,7 +561,7 @@ namespace NParser
                             b.end = blockEnd;
                             f.JumpTable.Add(jump, b);
                             f.conditionalLine = fullLine;
-                            if (type == "ifelse" && jump == JumpType.Succes)
+                            if (type == "elseif" && jump == JumpType.Succes)
                             {
                                 expected.Push("[");
                                 jump = JumpType.Fail;

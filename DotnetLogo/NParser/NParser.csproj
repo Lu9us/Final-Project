@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;DEBUG;NETSTANDARD2_0 ALLTRACK;NETSTANDARD2_0;NETSTANDARD2_0</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;NETSTANDARD2_0 ;NETSTANDARD2_0;NETSTANDARD2_0;NETSTANDARD2_0</DefineConstants>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 

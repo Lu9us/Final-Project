@@ -132,7 +132,7 @@ namespace NParser.Runtime
                         Dictionary<string, NetLogoObject> param = new Dictionary<string, NetLogoObject>(sys.GetCurrentFrame().param);
                         Dictionary<string, NetLogoObject> vars = new Dictionary<string, NetLogoObject>(sys.GetCurrentFrame().locals);
                         param.Add("Agent", l[k]);
-
+                        l[k].properties.SetProperty("rotation", new Number { val = sys.r.Next(360) });
                         StackFrame s = new StackFrame("NEWAGENT " + ac.breed, param
                             , ac)
                         { isAsk = true, locals = vars };
@@ -218,21 +218,26 @@ namespace NParser.Runtime
                         sf.flowControl = true;
                         sf.isAsk = sys.GetCurrentFrame().isAsk;
                         ExecFrame(sf, fc.JumpTable[FlowControll.JumpType.Succes], n);
+                        sys.GetCurrentFrame().pc += fc.GetTotalJump();
                     }
                     else if (fc.type == "elseif")
                     {
                         StackFrame sf =
-                            new StackFrame(f.name + "|" + fc.conditionalLine + "|" + FlowControll.JumpType.Fail,
-                                sys.GetCurrentFrame().param, fc.JumpTable[FlowControll.JumpType.Fail]);
+                             new StackFrame(f.name + "|" + fc.conditionalLine + "|" + FlowControll.JumpType.Fail,
+                                 sys.GetCurrentFrame().param, fc.JumpTable[FlowControll.JumpType.Fail]);
                         sf.anonymousFunction = false;
                         sf.flowControl = true;
                         sf.isAsk = sys.GetCurrentFrame().isAsk;
                         ExecFrame(sf, fc.JumpTable[FlowControll.JumpType.Fail], n);
+                        sf.anonymousFunction = false;
+                        sys.GetCurrentFrame().pc += fc.GetTotalJump();
                     }
                     else
                     {
                         sys.GetCurrentFrame().pc += fc.GetTotalJump();
                     }
+                       
+                    
                     //  ParseTree pt = new ParseTree(fc.conditionalLine);
                     //   ExecuteTree(pt);
 
@@ -401,7 +406,7 @@ namespace NParser.Runtime
 
 
             StackFrame oldFrame = sys.exeStack.Pop();
-            if (f is Ask || f is Block || f is AgentCreationStatement)
+            if (f is Ask  || f is AgentCreationStatement)
             {
                 sys.GetCurrentFrame().pc = oldFrame.pc + f.pcOffset;
             }

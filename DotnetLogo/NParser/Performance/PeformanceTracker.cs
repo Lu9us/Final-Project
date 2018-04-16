@@ -26,7 +26,7 @@ namespace NParser.Performance
        private static Thread writerThread;
        private static Utils.Queue<String> writeQueue;
        private static int waitTime = 50;
-       private static string filename = "Performance" + DateTime.Now.ToString("ddMMyyyyHHmmss")+".txt";
+       private static string filename = "Performance" + DateTime.Now.ToString("ddMMyyyyHHmmss")+".csv";
         private static TrackingState trackingState;
        private static object queueLock = new object();
 
@@ -73,19 +73,28 @@ namespace NParser.Performance
 
            }
        }
-
+        public static int StopWithoutWrite(string name)
+        {
+            if (watchList.ContainsKey(name))
+            {
+                watchList[name].Stop();
+                int data = watchList[name].Elapsed.Milliseconds;
+                watchList.Remove(name);
+                return data;
+            }
+            return -1;
+        }
        public static void Stop(string name)
        {
            if (watchList.ContainsKey(name))
            {
                watchList[name].Stop();
-               string data = name + Environment.NewLine + watchList[name].Elapsed.TotalMilliseconds.ToString() +
+               string data = name +"," + watchList[name].Elapsed.TotalMilliseconds.ToString() +
                Environment.NewLine;
                watchList.Remove(name);
-               lock (queueLock)
-               {
+              
                    writeQueue.Enqueue(data);
-                }
+                
                
            }
            else
@@ -99,7 +108,7 @@ namespace NParser.Performance
        private static void Write()
        {
            File.Create(filename).Close();
-           File.AppendAllText(filename,trackingState.ToString());
+           File.AppendAllText(filename,trackingState.ToString()+ Environment.NewLine);
            string data = null;
             while (true)
            {
@@ -109,8 +118,7 @@ namespace NParser.Performance
                    
                        while (writeQueue.Count > 0)
                        {
-                           lock (queueLock)
-                           {
+                           
                             data = writeQueue.Dequeue();
 
 
@@ -118,7 +126,7 @@ namespace NParser.Performance
 
                            data = null;
 
-                       }
+                       
                    }
                }
                else

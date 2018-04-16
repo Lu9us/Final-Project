@@ -173,16 +173,19 @@ namespace NParser.Runtime
                 MetaAgent m = (MetaAgent)GetCurrentFrame().param["Agent"];
                 if (m.properties.GetProperty(s) != null)
                 {
-                m.properties.SetProperty(s,val);
+                    m.properties.SetProperty(s, val);
                 }
                 else if (patches[m.x, m.y] != null)
                 {
-                    patches[m.x, m.y].properties.SetProperty(s,val);
+                    patches[m.x, m.y].properties.SetProperty(s, val);
                 }
 
 
             }
-
+            else
+            {
+                GetCurrentFrame().locals[s] = val;
+            }
         }
 
         internal StackFrame GetLowerStackFunction()
@@ -267,6 +270,7 @@ namespace NParser.Runtime
         }
 
         public Patch[,] patches;
+        internal  Random r = new Random(Guid.NewGuid().GetHashCode());
         internal Dictionary<string,Function> registeredFunctions = new Dictionary<string, Function>();
         internal Stack<StackFrame> exeStack = new Stack<StackFrame>();
         internal Dictionary<string, NetLogoObject> globals = new Dictionary<string, NetLogoObject>();

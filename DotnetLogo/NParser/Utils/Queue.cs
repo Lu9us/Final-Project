@@ -10,7 +10,7 @@ namespace NParser.Utils
     /// <typeparam name="T"></typeparam>
     public class Queue<T>
     {
-
+        public object lockObj = new object();
 
        public Queue()
         {
@@ -25,7 +25,17 @@ namespace NParser.Utils
             return count < 1;
 
         }
-
+        public T Peek()
+        {
+            if (Empty())
+            {
+                return default;
+            }
+            else
+            {
+                return array[count-1];
+            }
+        }
         private int count;
 
         public int Count
@@ -35,12 +45,16 @@ namespace NParser.Utils
 
         public void Enqueue(T data)
         {
+             
             if (count >= array.Length)
             {
-                int s = array.Length * 2;
-                T[] newArray = new T[s];
-                Array.Copy(array,newArray,array.Length);
-                array = newArray;
+                lock (lockObj)
+                {
+                    int s = array.Length * 2;
+                    T[] newArray = new T[s];
+                    Array.Copy(array, newArray, array.Length);
+                    array = newArray;
+                }
             }
 
             array[count] = data;
@@ -56,10 +70,13 @@ namespace NParser.Utils
             }
             else
             {
-                count--;
-                T dat = array[count];
-                array[count] = default;
-                return dat;
+                lock (lockObj)
+                {
+                    count--;
+                    T dat = array[count];
+                    array[count] = default;
+                    return dat;
+                }
 
             }
 

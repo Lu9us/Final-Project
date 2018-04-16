@@ -2,6 +2,8 @@
 using NParser.Types.Agents;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Text;
 
 namespace NParser.Types.Internals
@@ -15,13 +17,14 @@ namespace NParser.Types.Internals
 
     public static class OperatorFunctions
     {
-        private static Random r = new Random(DateTime.Now.Day + DateTime.Now.Month + DateTime.Now.Year);
+        
         private static SystemState sys = SystemState.internalState;
 
         public static void ResetSystemState()
         {
             sys = SystemState.internalState;
         }
+        [OperatorName(cast = false, name = "elseif")]
         [OperatorName(cast = false, name = "if")]
         public static Boolean IF(Boolean o, NetLogoObject n)
         {
@@ -106,10 +109,7 @@ namespace NParser.Types.Internals
         [OperatorName(cast = false, name = "set")]
         public static NetLogoObject set(NetLogoObject o, NetLogoObject n)
         {
-            if (sys.GetCurrentFrame().isAsk)
-            {
-                var v = (MetaAgent)sys.GetCurrentFrame().param["Agent"];
-
+           
                 if (o.ptrID != null)
                 {
                     n = sys.Assign(n.value.ToString(), true);
@@ -123,13 +123,7 @@ namespace NParser.Types.Internals
 
 
                 return new NetLogoObject() { ptrID = "NULLPTR" };
-            }
-            else
-            {
-                sys.GetCurrentFrame().locals[(string)o.value] = n;
-            }
 
-            return new NetLogoObject() { ptrID = o.ptrID };
 
         }
         [OperatorName(name = "+")]
@@ -152,6 +146,39 @@ namespace NParser.Types.Internals
         {
             return new Number() { val = n.val * b.val };
         }
+        [OperatorName(name = "assertEql")]
+        public static NetLogoObject AssertEql(NetLogoObject n, NetLogoObject b)
+        {
+            string data = Environment.NewLine;
+            data += "assertEql called in function: "+sys.GetCurrentFrame().FunctionName;
+            data += Environment.NewLine;
+            data += "Function lines of code:";
+            data += Environment.NewLine; 
+            foreach (string s in sys.GetCurrentFrame().baseFunction.body)
+            {
+                data += s;
+                data += Environment.NewLine;
+            }
+            
+            data += Environment.NewLine;
+            data += "call stack frame:";
+            data += Environment.NewLine;
+            data += sys.GetCurrentFrame().ToString();
+            data += Environment.NewLine;
+            if (n.value.Equals(b.value))
+            {
+                data += ", Assert: True";
+            }
+            else
+            {
+                data += ", Assert: False";
+            }
+            data += Environment.NewLine;
+            data += Environment.NewLine;
+            File.AppendAllText("assert" + Process.GetCurrentProcess().StartTime.ToString("ddMMyyyyHHmm") + ".csv", data);
+            return new NetLogoObject() { ptrID = "NULLPTR" };
+
+        }
         [OperatorName(name = "setxy")]
         public static NetLogoObject setxy(Number x, Number y)
         {
@@ -169,12 +196,29 @@ namespace NParser.Types.Internals
 
             return new NetLogoObject() { ptrID = "NULLPTR" };
         }
+        [OperatorName(name = "start-stopwatch")]
+        public static NetLogoObject StopwatchStart(NetLogoObject o, NetLogoObject n)
+        {
+            Performance.PeformanceTracker.StartStopWatch((string)o.value);
+            return new NetLogoObject() { ptrID = "NULLPTR" };
+        }
+
+        [OperatorName(name = "stop-stopwatch",cast = false)]
+        public static NetLogoObject StopwatchEnd(NetLogoObject o, NetLogoObject n)
+        {
+            o = sys.Assign((string)o.value, true);
+           int val =  Performance.PeformanceTracker.StopWithoutWrite((string)o.value);
+            set(n, new Number() { value = val });
+            return new NetLogoObject() { ptrID = "NULLPTR" };
+        }
+
+
         [OperatorName(cast = false,name = "random-xcor")]
         [OperatorName(cast = false, name = "random-ycor")]
         [OperatorName(cast = false, name = "random")]
         public static Number random(NetLogoObject o, NetLogoObject n)
         {
-            int x = r.Next(20);
+            int x = sys.r.Next(50);
             return new Number() { value = x };
 
         }
