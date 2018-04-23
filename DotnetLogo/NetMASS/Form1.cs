@@ -231,7 +231,7 @@ namespace NetMASS
             if (!string.IsNullOrEmpty(txtScript.Text)||!string.IsNullOrWhiteSpace(txtScript.Text))
             {
                 txtConsole.Clear();
-               
+                es = new ExecutionEngine();
                 es.Load(txtScript.Text.Split(Environment.NewLine.ToCharArray()[0]));
                 scriptVerified = true;
                 pbSim.Refresh();

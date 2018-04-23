@@ -107,7 +107,7 @@ namespace NParser
                        // Declarative(line);
 
                     }
-                    else if (agentDeclarativeKeywords.Any(a => FirstStatment.StartsWith(a)))
+                    else if (agentDeclarativeKeywords.Any(a => FirstStatment.Contains(a)))
                     {
                         
                         AgentDeclaritive(line);

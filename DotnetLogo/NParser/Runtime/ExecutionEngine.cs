@@ -38,8 +38,10 @@ namespace NParser.Runtime
         {
             preProccessor.SetData(data);
             while (!preProccessor.fileEnd)
+            {
                 preProccessor.FirstPassRead();
 
+            }
 
         }
 
@@ -423,18 +425,25 @@ namespace NParser.Runtime
         public void ExecFunction(TreeNode n)
         {
             Function f = sys.registeredFunctions[n.data];
-
+            bool ask = false;
 
 
             sys.BreakExecution = false;
             List<NetLogoObject> vals = GetParams(n, f.name);
-
+           
             Dictionary<string, NetLogoObject> objects = new Dictionary<string, NetLogoObject>();
+            if (sys.GetCurrentFrame().isAsk)
+            {
+
+                ask = true;
+                objects.Add("Agent",sys.GetCurrentFrame().param["Agent"]);
+            }
             for (int i = 0; i < f.paramaters.Count; i++)
             {
                 objects.Add(f.paramaters[i], vals[i]);
             }
-            StackFrame fFrame = new StackFrame(f.name, objects, f) { Report = f.Report };
+            
+            StackFrame fFrame = new StackFrame(f.name,objects, f) { Report = f.Report,isAsk = ask };
 
             fFrame.pc = 0;
             ExecFrame(fFrame, f, n);

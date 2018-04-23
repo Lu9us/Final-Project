@@ -98,7 +98,12 @@ namespace NParser.Types.Internals
             return new NetLogoObject() { ptrID = o.value.ToString() };
 
         }
-
+        [OperatorName(name = "get-n",cast = true)]
+        public static NetLogoObject getNeighbours(Number i, Number j)
+        {
+            List<Patch> data = sys.GetNeighbours((int)i.val, (int)j.val);
+            return new NetLogoObject() { ptrID = "NULLPTR" };
+        }
         [OperatorName(name = "show",cast = true)]
         public static NetLogoObject show(NetLogoObject o, NetLogoObject d)
         {

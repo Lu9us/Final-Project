@@ -96,6 +96,28 @@ namespace NParser.Runtime
 
         }
 
+        internal  List<Patch> GetNeighbours(int x, int y)
+        {
+            List<Patch> list = new List<Patch>();
+
+            for (int i = x - 1; i < x + 2; i++)
+            {
+                for (int j = y - 1; j < y + 2; j++)
+                {
+                    if (i < patches.GetLongLength(0) && i > -1 && j < patches.GetLongLength(1) && j > -1)
+                    {
+                        if (!(i == x && j == y))
+                        {
+                            list.Add(patches[i, j]);
+                        }
+                    }
+                }
+
+            }
+            return list;
+        }
+
+
         internal StackFrame GetCurrentFrame()
         {
             if (exeStack.Peek().anonymousFunction)
