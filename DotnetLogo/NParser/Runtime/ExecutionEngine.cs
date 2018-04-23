@@ -130,7 +130,7 @@ namespace NParser.Runtime
                     {
                         //copy construct to not alter original data
                         Dictionary<string, NetLogoObject> param = new Dictionary<string, NetLogoObject>(sys.GetCurrentFrame().param);
-                        Dictionary<string, NetLogoObject> vars = new Dictionary<string, NetLogoObject>(sys.GetCurrentFrame().locals);
+                        Dictionary<string, NetLogoObject> vars = sys.GetCurrentFrame().locals;
                         param.Add("Agent", l[k]);
                         l[k].properties.SetProperty("rotation", new Number { val = sys.r.Next(360) });
                         StackFrame s = new StackFrame("NEWAGENT " + ac.breed, param
@@ -189,7 +189,7 @@ namespace NParser.Runtime
                     {
                         //copy construct to not alter original data
                         Dictionary<string, NetLogoObject> param = new Dictionary<string, NetLogoObject>(sys.GetCurrentFrame().param);
-                        Dictionary<string, NetLogoObject> vars = new Dictionary<string, NetLogoObject>(sys.GetCurrentFrame().locals);
+                        Dictionary<string, NetLogoObject> vars = sys.GetCurrentFrame().locals;
                         param.Add("Agent", l[i]);
                         StackFrame ff = new StackFrame(name + "-ask",
                            param, a)
