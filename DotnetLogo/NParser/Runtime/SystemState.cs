@@ -13,6 +13,13 @@ namespace NParser.Runtime
         internal static SystemState internalState;
         public bool BreakExecution = false;
         public bool ExceptionThrown = false;
+        public Patch[,] patches;
+        internal Random r = new Random(Guid.NewGuid().GetHashCode());
+        internal Dictionary<string, Function> registeredFunctions = new Dictionary<string, Function>();
+        internal Stack<StackFrame> exeStack = new Stack<StackFrame>();
+        internal Dictionary<string, NetLogoObject> globals = new Dictionary<string, NetLogoObject>();
+        public Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+
         public SystemState()
         {
             patches = new Patch[50,50];
@@ -29,6 +36,11 @@ namespace NParser.Runtime
 
             internalState = this;
         }
+        /// <summary>
+        /// Get the type of a piece of data dependent on its format
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
         public Type checkType(string s)
         {
             if (char.IsDigit(s[0]))
@@ -44,7 +56,12 @@ namespace NParser.Runtime
 
             return null;
         }
-
+        /// <summary>
+        /// ceate a logo object for varible type passed in  
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="getValFromRef"></param>
+        /// <returns></returns>
         public NetLogoObject Assign(string s,bool getValFromRef = true)
         {
             bool b = false;
@@ -96,7 +113,12 @@ namespace NParser.Runtime
             }
 
         }
-
+        /// <summary>
+        /// Retrives a list of patches within 1 unit around a X Y point
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
         internal  List<MetaAgent> GetNeighbours(int x, int y)
         {
             List<MetaAgent> list = new List<MetaAgent>();
@@ -118,7 +140,10 @@ namespace NParser.Runtime
             return list;
         }
 
-
+        /// <summary>
+        /// returns the current stack frame
+        /// </summary>
+        /// <returns></returns>
         internal StackFrame GetCurrentFrame()
         {
             if (exeStack.Peek().anonymousFunction)
@@ -132,7 +157,11 @@ namespace NParser.Runtime
 
         }
 
-
+        /// <summary>
+        /// Returns data for ask requests 
+        /// </summary>
+        /// <param name="breed"></param>
+        /// <returns></returns>
         public List<MetaAgent> GetBreed(string breed)
         {
             List<MetaAgent> data = new List<MetaAgent>();
@@ -163,7 +192,11 @@ namespace NParser.Runtime
             return data;
 
         }
-
+        /// <summary>
+        /// Gets a value from a Logo object 
+        /// </summary>
+        /// <param name="o"></param>
+        /// <returns></returns>
             public string GetVal(NetLogoObject o)
         {
             if (o is Number)
@@ -180,7 +213,10 @@ namespace NParser.Runtime
                 return Assign(o.value.ToString()).value.ToString(); ;
             }
         }
-
+        /// <summary>
+        /// Unwinds the stack to the first non anonymous functions
+        /// </summary>
+        /// <returns></returns>
         public StackFrame UnwindAnonFunctions()
         {
             List<StackFrame> tempQueue = new List<StackFrame>();
@@ -201,7 +237,11 @@ namespace NParser.Runtime
             }
             return null;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="val"></param>
         public void set(string s, NetLogoObject val)
         {
             if (GetCurrentFrame().isAsk)
@@ -213,12 +253,15 @@ namespace NParser.Runtime
                     GetCurrentFrame().locals[s] = val;
                 }
 
-               else if (patches[m.x, m.y] != null)
+               else if (patches[m.x, m.y] != null && patches[m.x, m.y].properties.properties.ContainsKey(s))
                 {
-                    patches[m.x, m.y].properties.SetProperty(s, val);
+                    if (patches[m.x, m.y].properties.properties.ContainsKey(s))
+                    {
+                        patches[m.x, m.y].properties.SetProperty(s, val);
+                    }
                 }
 
-                else if(m.properties.GetProperty(s) != null)
+                else if(m.properties.properties.ContainsKey(s))
                 {
                     m.properties.SetProperty(s, val);
                 }
@@ -230,7 +273,10 @@ namespace NParser.Runtime
                 GetCurrentFrame().locals[s] = val;
             }
         }
-
+        /// <summary>
+        /// get the stack frame below the current
+        /// </summary>
+        /// <returns></returns>
         internal StackFrame GetLowerStackFunction()
         {
           StackFrame s =  exeStack.Pop();
@@ -238,7 +284,11 @@ namespace NParser.Runtime
           exeStack.Push(s);
           return ret;
         }
-
+        /// <summary>
+        /// Get a varible from an identity 
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
         public NetLogoObject Get(string s)
         {
             if (GetCurrentFrame().param.ContainsKey(s))
@@ -269,6 +319,9 @@ namespace NParser.Runtime
             }
             return null;
         }
+        /// <summary>
+        /// Prints out the current call stack
+        /// </summary>
         public void PrintCallStack()
         {
             StackFrame f;
@@ -312,12 +365,7 @@ namespace NParser.Runtime
 
         }
 
-        public Patch[,] patches;
-        internal  Random r = new Random(Guid.NewGuid().GetHashCode());
-        internal Dictionary<string,Function> registeredFunctions = new Dictionary<string, Function>();
-        internal Stack<StackFrame> exeStack = new Stack<StackFrame>();
-        internal Dictionary<string, NetLogoObject> globals = new Dictionary<string, NetLogoObject>();
-        public Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+        
         public void AddFunction(Function function)
         {
             registeredFunctions.Add(function.name, function);

@@ -80,7 +80,11 @@ namespace NParser.Runtime
 
         }
 
-
+        /// <summary>
+        /// Back bone function to execute parse tree 
+        /// </summary>
+        /// <param name="n"></param>
+        /// <param name="t"></param>
         private void Exec(TreeNode n, ParseTree t)
         {
             try
@@ -100,6 +104,7 @@ namespace NParser.Runtime
                 {
                     return;
                 }
+                //Execute function
                 else if (sys.registeredFunctions.ContainsKey(n.data))
                 {
                     NodeExececution(n);
@@ -112,21 +117,24 @@ namespace NParser.Runtime
                     ExecOp(n);
 
                 }
-
+                //Build a agent create function from node
                 if (n.data.StartsWith("create-"))
                 {
+                    //Get Function
                     Function f = sys.GetCurrentFrame().baseFunction;
                     StackFrame oldFrame = null;
                     int i = sys.GetCurrentFrame().pc + 1;
+                    //Retrive agent create data from currently running function
                     AgentCreationStatement ac =
                         f.agentData.First(a => a.pcOffset == i && a.breed == n.data.Split('-')[1]);
                     int count = int.Parse((string)sys.Assign(ac.countVar).value.ToString());
+                    //create agents
                     List<MetaAgent> l = new List<MetaAgent>();
                     for (int j = 0; j < count; j++)
                     {
                         l.Add(new Agent());
                     }
-
+                    //for each agent construct a stack frame and execute it 
                     sys.GetCurrentFrame().pc = +ac.body.Count() + 1;
                     for (int k = 0; k < l.Count; k++)
                     {
@@ -158,7 +166,7 @@ namespace NParser.Runtime
                         Performance.PeformanceTracker.Stop(oldFrame.FunctionName);
 #endif
                     }
-
+                    //add agents to the system state
                     foreach (MetaAgent a in l)
                     {
                         sys.agents.Add("Agent " + a.ID, (Agent)a);
@@ -168,12 +176,12 @@ namespace NParser.Runtime
   sys.PrintCallStack();
 #endif
 
-                    //sys.GetCurrentFrame().pc += oldFrame.pc;
 #if DEBUG
                     Console.WriteLine(oldFrame.ToString());
 #endif
                     skipToJump = true;
                 }
+                //performe ask request on agents
                 else if (n.data.StartsWith("ask"))
                 {
 
@@ -213,6 +221,7 @@ namespace NParser.Runtime
 
 
                 }
+                // execute a branching statement
                 else if (n.data.StartsWith("if") || n.data.StartsWith("elseif"))
                 {
                     Function f = sys.GetCurrentFrame().baseFunction;
@@ -220,9 +229,10 @@ namespace NParser.Runtime
                     FlowControll fc = f.flowControls.First(a => line.Contains(a.conditionalLine));
                     Dictionary<string, NetLogoObject> param = new Dictionary<string, NetLogoObject>(sys.GetCurrentFrame().param);
                     Dictionary<string, NetLogoObject> vars = sys.GetCurrentFrame().locals;
+                    //observe result of the if block
                     if (bool.Parse(n.left.data))
                     {
-                      
+                      //build a stack frame from the jump table of the current if block
                         StackFrame sf =
                             new StackFrame(f.name + "|" + fc.conditionalLine + "|" + FlowControll.JumpType.Succes,
                                 param, fc.JumpTable[FlowControll.JumpType.Succes]);
@@ -236,6 +246,7 @@ namespace NParser.Runtime
                     }
                     else if (fc.type == "elseif")
                     {
+                        //if the else block is an else if then it posesses a failure block and the if block has failed so use the fail block
                         StackFrame sf =
                              new StackFrame(f.name + "|" + fc.conditionalLine + "|" + FlowControll.JumpType.Fail,
                                param, fc.JumpTable[FlowControll.JumpType.Fail]);
@@ -273,6 +284,19 @@ namespace NParser.Runtime
             }
         }
 
+        public void ExecForPatch(int x, int y, TreeNode n)
+        {
+            if (sys.patches.GetLength(0) < x && sys.patches.GetLength(1) < y)
+            {
+                MetaAgent m = sys.patches[x, y];
+                
+            }
+            
+        }
+        /// <summary>
+        ///  Get value from varible identity
+        /// </summary>
+        /// <param name="n"></param>
         public void GetVar(TreeNode n)
         {
             TreeNode temp = new TreeNode(sys.GetVal(sys.Get(n.data)));
@@ -286,27 +310,15 @@ namespace NParser.Runtime
             }
             temp.parent = n.parent;
         }
-
+        /// <summary>
+        /// Decide on how to execute tree node 
+        /// </summary>
+        /// <param name="n">Node to execute</param>
         public void NodeExececution(TreeNode n)
         {
 
-            if (n.left != null && (sys.registeredFunctions.ContainsKey(n.left.data) || isOp(n.left)) && n.right != null)
-            {
-                //TreeNode ns = ReadToLeaf(n.left);
-                //ns.left = new TreeNode(n.right.data);
-                //ns.left.parent = ns;
-                //n.right = null;
-                if (isOp(n.left))
-                {
-                    ExecOp(n.left);
-                }
-                else
-                {
-                    ExecFunction(n.left);
-                }
-
-            }
-            else if (n.left != null && (sys.registeredFunctions.ContainsKey(n.left.data) || isOp(n.left)))
+      
+             if (n.left != null && (sys.registeredFunctions.ContainsKey(n.left.data) || isOp(n.left)))
             {
                 if (isOp(n.left))
                 {
@@ -317,23 +329,7 @@ namespace NParser.Runtime
                     ExecFunction(n.left);
                 }
             }
-            /* if (n.right != null && (sys.registeredFunctions.ContainsKey(n.right.data) || isOp(n.right)) && n.left != null)
-             {
-                 TreeNode ns = ReadToLeaf(n.right);
-                 ns.right = new TreeNode(n.right.data);
-                 ns.right.parent = ns;
-                 n.left = null;
-                 if (isOp(n.right))
-                 {
-                     ExecOp(n.right);
-                 }
-                 else
-                 {
-                     ExecFunction(n.right);
-                 }
-
-             }
-             else*/
+          
             if (n.right != null && (sys.registeredFunctions.ContainsKey(n.right.data) || isOp(n.right)))
             {
                 if (isOp(n.right))
@@ -348,7 +344,12 @@ namespace NParser.Runtime
         }
 
 
-
+        /// <summary>
+        /// Execute a stack frame
+        /// </summary>
+        /// <param name="fFrame">Stack frame to execute</param>
+        /// <param name="f">The function of which the stack frame is based</param>
+        /// <param name="n">TreeNode being executed</param>
         public void ExecFrame(StackFrame fFrame, Function f, TreeNode n)
         {
 #if STACKTRACK || ALLTRACK
@@ -361,6 +362,7 @@ namespace NParser.Runtime
 #if StackTrace
             sys.PrintCallStack();
 #endif
+            //execute stack frame till end
             while (fFrame.pc < f.body.Length && !sys.BreakExecution)
             {
                 pt = new ParseTree(f.body[fFrame.pc]);
@@ -384,7 +386,7 @@ namespace NParser.Runtime
             }
 
 #endif
-
+            //if there is a value to be reported place it into the parse tree or remove node from parse tree 
             if (f.Report && sys.GetCurrentFrame().ReportValue != null)
             {
                 sys.BreakExecution = false;
@@ -419,7 +421,7 @@ namespace NParser.Runtime
                 }
             }
 
-
+            //pop the stack and the jump last function to the end of the current function
             StackFrame oldFrame = sys.exeStack.Pop();
             if (f is Ask  || f is AgentCreationStatement)
             {
@@ -434,7 +436,10 @@ namespace NParser.Runtime
 #endif
         }
 
-
+        /// <summary>
+        /// Execute a function based on tree node passed in
+        /// </summary>
+        /// <param name="n">tree node for function </param>
         public void ExecFunction(TreeNode n)
         {
             Function f = sys.registeredFunctions[n.data];
@@ -445,22 +450,30 @@ namespace NParser.Runtime
             List<NetLogoObject> vals = GetParams(n, f.name);
            
             Dictionary<string, NetLogoObject> objects = new Dictionary<string, NetLogoObject>();
+            //if ask pass agent into the paraters
             if (sys.GetCurrentFrame().isAsk)
             {
 
                 ask = true;
                 objects.Add("Agent",sys.GetCurrentFrame().param["Agent"]);
             }
+            //pair paramaters with names
             for (int i = 0; i < f.paramaters.Count; i++)
             {
                 objects.Add(f.paramaters[i], vals[i]);
             }
-            
+            //build and execute stack frame
             StackFrame fFrame = new StackFrame(f.name,objects, f) { Report = f.Report,isAsk = ask };
 
             fFrame.pc = 0;
             ExecFrame(fFrame, f, n);
         }
+        /// <summary>
+        /// Get paramaters for function
+        /// </summary>
+        /// <param name="n"></param>
+        /// <param name="functionName"></param>
+        /// <returns></returns>
         private List<NetLogoObject> GetParams(TreeNode n, string functionName)
         {
             List<NetLogoObject> paramList = new List<NetLogoObject>();
@@ -492,7 +505,11 @@ namespace NParser.Runtime
 
 
 
-
+        /// <summary>
+        /// Does tree node have both parents 
+        /// </summary>
+        /// <param name="n">Tree node</param>
+        /// <returns></returns>
         public bool nodeFull(TreeNode n)
         {
             if (n.left != null && n.right != null)
@@ -506,11 +523,15 @@ namespace NParser.Runtime
 
         }
 
-
+        /// <summary>
+        /// Execute operator
+        /// </summary>
+        /// <param name="n">tree node</param>
         public void ExecOp(TreeNode n)
         {
 
             NetLogoObject obj = null;
+            //create parse tree to get operator list THIS IS A HACK
             ParseTree t = new ParseTree("");
             try
             {
@@ -524,7 +545,7 @@ namespace NParser.Runtime
 
                     if (t.IsOperator(n.right))
                     {
-                        ExecOp(n.left);
+                        ExecOp(n.right);
 
                     }
 
@@ -551,11 +572,12 @@ namespace NParser.Runtime
                         new NetLogoObject() { ptrID = "NULLPTR" }, n.data);
 
                 }
-
+                //place results of the operation on tree
                 TreeNode tempNode = new TreeNode(obj.value.ToString());
 #if OPTRACK || ALLTRACK
                 Performance.PeformanceTracker.Stop(n.data);
 #endif
+                //replace node
                 if (n.parent != null)
                 {
                     if (n.parent.left == n)
@@ -576,13 +598,22 @@ namespace NParser.Runtime
 
             }
         }
-
+        /// <summary>
+        /// Checks if node is operator
+        /// </summary>
+        /// <param name="n">node to check</param>
+        /// <returns></returns>
         private bool isOp(TreeNode n)
         {
+            //hack
             ParseTree tr = new ParseTree("");
             return tr.IsOperator(n);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns></returns>
         private TreeNode ReadToLeaf(TreeNode n)
         {
             if (n.left == null && n.right == null)

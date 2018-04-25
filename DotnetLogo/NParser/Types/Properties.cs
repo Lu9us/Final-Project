@@ -51,6 +51,7 @@ namespace NParser.Types
             }
             try
             {
+             
                 properties[name] = value;
                 if (Events.ContainsKey(name))
                 { Events[name].Invoke(value); }

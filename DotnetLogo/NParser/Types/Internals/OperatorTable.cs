@@ -30,14 +30,31 @@ namespace NParser.Types.Internals
 
     internal static class OperatorTable
     {
+    /// <summary>
+    /// Generic delegate for operator calls
+    /// </summary>
+    /// <typeparam name="t1">paramater type 1</typeparam>
+    /// <typeparam name="t2">paramater type 2</typeparam>
+    /// <typeparam name="t3">return type</typeparam>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <returns></returns>
         public delegate t3 opFunct<t1, t2,t3>(t1 a, t2 b);
 
         public static Dictionary<OpPair, Delegate> opTable = new Dictionary<OpPair, Delegate>();
 
+        /// <summary>
+        /// call an operator 
+        /// </summary>
+        /// <typeparam name="t3">Return type</typeparam>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="s"></param>
+        /// <returns></returns>
         internal static t3 Call<t3>(NetLogoObject a, NetLogoObject b,string s)
         {
 
-
+            //if the operator requires a cast the get the value from the varible identity
             if (a.GetType() == typeof(NetLogoObject) && !string.IsNullOrEmpty(a.ptrID) && a.ptrID != "NULLPTR" && opTable.Any(t => t.Key.token == s && t.Key.cast)) //&& v.cast)
             {
                 a = SystemState.internalState.Assign(a.value.ToString());
@@ -72,7 +89,7 @@ namespace NParser.Types.Internals
             }
 
 #endif
-
+            //get delegate and operator types
             Delegate d = opTable.First(c => (a.GetType().IsSubclassOf(c.Key.opL) || a.GetType() == c.Key.opL) && (b.GetType().IsSubclassOf(c.Key.opR) || b.GetType() == c.Key.opR) && c.Key.token == s  ).Value;
             OpPair v =  opTable.First(c => (a.GetType().IsSubclassOf(c.Key.opL) || a.GetType() == c.Key.opL) && (b.GetType().IsSubclassOf(c.Key.opR) || b.GetType() == c.Key.opR) && c.Key.token == s).Key;
             if (d != null)
@@ -81,7 +98,7 @@ namespace NParser.Types.Internals
                 try
                 {
 
-
+                    //call operator
                     return (t3)d.DynamicInvoke(new[] { a, b });
 
                 }
@@ -92,7 +109,9 @@ namespace NParser.Types.Internals
             }
             return default(t3);
         }
-
+        /// <summary>
+        /// global constructor that 
+        /// </summary>
         static OperatorTable()
         {
 
@@ -118,8 +137,8 @@ namespace NParser.Types.Internals
                 }
 
             }
-           
-
+           // old global constructer these basically do the same thing just the one abouve is automated the one below is hand written
+           // Its still here as a monument to my mistakes
 /*
             opFunct<NetLogoObject, NetLogoObject, NetLogoObject> temp = OperatorFunctions.let;
             opTable.Add(new OpPair(typeof(NetLogoObject), typeof(NetLogoObject), typeof(NetLogoObject), "let",false),temp);
