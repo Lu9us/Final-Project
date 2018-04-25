@@ -9,33 +9,67 @@ namespace NParser.Runtime.DataStructs
 {
     public class TreeNode
     {
+       
         internal TreeNode(string data)
         {
             this.data = data;
         }
+
+        internal TreeNode(TreeNode node, TreeNode parent)
+        {
+            this.data = node.data;
+            this.parent = parent;
+            if (node.left != null)
+            {
+                this.left = new TreeNode(node.left,this);
+            }
+            if (node.right != null)
+            {
+                this.right = new TreeNode(node.right, this);
+            }
+        }
+
+
         public TreeNode parent;
         public readonly string data;
         public TreeNode left;
         public TreeNode right;
     }
+
     public class ParseTree
     {
+        internal static Dictionary<string,ParseTree> treeCache = new Dictionary<string, ParseTree>();
         char[] delims = new[] { ' ', '[', ']', ',' };
-        List<string> operators = OperatorTable.opTable.Select(o => o.Key.token).ToList();
+        List<string> operators = OperatorTable.opTable.Select(o => o.Key.token ).ToList();
       
         public  TreeNode root;
-      public  ParseTree(string expression)
-       {
-           // operators.AddRange(SystemState.internalState.registeredFunctions.Keys);
+
+        private ParseTree(TreeNode root)
+        {
+            this.root = new TreeNode(root, null);
+        }
+
+        public ParseTree(string expression)
+        {
+            if (treeCache.ContainsKey(expression))
+            {
+                root = new TreeNode(treeCache[expression].root, null);
+                return;
+            }
+
             root = new TreeNode(expression);
             string[] tokens = StringUtilities.split(delims, expression);
             if (expression.Trim().StartsWith(";"))
             {
-                this.root =new TreeNode(expression);
+                this.root = new TreeNode(expression);
+                if (!treeCache.ContainsKey(expression))
+                {
+                    treeCache.Add(expression,new ParseTree( this.root));
+                }
                 return;
-                
+
             }
-                Stack<string> tokenStack = new Stack<string>();
+            Stack<string> tokenStack = new Stack<string>();
             Stack<string> opearatorStack = new Stack<string>();
 
 
@@ -43,32 +77,35 @@ namespace NParser.Runtime.DataStructs
             foreach (string data in tokens.Reverse())
             {
 
-                    if (!string.IsNullOrWhiteSpace(data) && !delims.Contains(data.ToCharArray()[0]))
+                if (!string.IsNullOrWhiteSpace(data) && !delims.Contains(data.ToCharArray()[0]))
+                {
+                    if (operators.Contains(data) && !data.Equals("random"))
                     {
-                        if (operators.Contains(data))
-                        {
 
 
 
-                            opearatorStack.Push(data);
-
-                        }
-
-                        else
-                        {
-                            tokenStack.Push(data);
-                        }
-
+                        opearatorStack.Push(data);
 
                     }
-                }
-                if (tokenStack.Count == 0 && opearatorStack.Count == 0)
-                {
-                    return;
-                }
 
-                this.root.left = NodeGen(tokenStack, opearatorStack, this.root);
-            
+                    else
+                    {
+                        tokenStack.Push(data);
+                    }
+
+
+                }
+            }
+            if (tokenStack.Count == 0 && opearatorStack.Count == 0)
+            {
+                return;
+            }
+
+            this.root.left = NodeGen(tokenStack, opearatorStack, this.root);
+            if (!treeCache.ContainsKey(expression))
+            {
+                treeCache.Add(expression, new ParseTree(this.root));
+            }
         }
 
 

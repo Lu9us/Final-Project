@@ -90,19 +90,20 @@ namespace NParser.Runtime
             }
             catch (Exception e)
             {
-                throw new RTException("Type missmatch occured: "+e.Message+Environment.NewLine+exeStack.Peek().ToString());
                 ExceptionThrown = true;
+                throw new RTException("Type missmatch occured: "+e.Message+Environment.NewLine+exeStack.Peek().ToString());
+              
             }
 
         }
 
-        internal  List<Patch> GetNeighbours(int x, int y)
+        internal  List<MetaAgent> GetNeighbours(int x, int y)
         {
-            List<Patch> list = new List<Patch>();
+            List<MetaAgent> list = new List<MetaAgent>();
 
-            for (int i = x - 1; i < x + 2; i++)
+            for (int i = (int)x - 1; i < x + 2; i++)
             {
-                for (int j = y - 1; j < y + 2; j++)
+                for (int j = (int)y - 1; j < y + 2; j++)
                 {
                     if (i < patches.GetLongLength(0) && i > -1 && j < patches.GetLongLength(1) && j > -1)
                     {
@@ -145,6 +146,19 @@ namespace NParser.Runtime
             else if (breed == "turtles")
             {
                 data.AddRange(agents.Values);
+            }
+            else if (breed == "neighbours")
+            {
+                if (GetCurrentFrame().isAsk)
+                {
+                    MetaAgent a = (MetaAgent)GetCurrentFrame().param["Agent"];
+                  return  GetNeighbours(((Integer)a.properties.GetProperty("X")).val, ((Integer)a.properties.GetProperty("Y")).val);
+                    
+                }
+                else
+                {
+                    throw new RTException("neighbours request passed with no agent");
+                }
             }
             return data;
 
@@ -193,15 +207,22 @@ namespace NParser.Runtime
             if (GetCurrentFrame().isAsk)
             {
                 MetaAgent m = (MetaAgent)GetCurrentFrame().param["Agent"];
-                if (m.properties.GetProperty(s) != null)
+
+                if (GetCurrentFrame().locals.ContainsKey(s))
                 {
-                    m.properties.SetProperty(s, val);
+                    GetCurrentFrame().locals[s] = val;
                 }
-                else if (patches[m.x, m.y] != null)
+
+               else if (patches[m.x, m.y] != null)
                 {
                     patches[m.x, m.y].properties.SetProperty(s, val);
                 }
 
+                else if(m.properties.GetProperty(s) != null)
+                {
+                    m.properties.SetProperty(s, val);
+                }
+                
 
             }
             else

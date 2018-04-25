@@ -13,11 +13,12 @@ namespace NParser.Types.Internals
     {
         public string name { get; set; }
         public bool cast { get; set; } = true;
+        public bool treatAsVal { get; set; } = false;
     }
 
     public static class OperatorFunctions
     {
-        
+
         private static SystemState sys = SystemState.internalState;
 
         public static void ResetSystemState()
@@ -32,10 +33,18 @@ namespace NParser.Types.Internals
             return o;
 
         }
-        [OperatorName(cast  = true,name ="=")]
-        public static Boolean equal(NetLogoObject o, NetLogoObject n)
+        [OperatorName(cast = true, name = "=")]
+        public static Boolean Equal(NetLogoObject o, NetLogoObject n)
         {
-            if (o.value.Equals( n.value))
+            if (!string.IsNullOrEmpty(o.ptrID))
+            {
+                o = sys.Assign(o.ptrID);
+            }
+            if (!string.IsNullOrEmpty(n.ptrID))
+            {
+                n = sys.Assign(n.ptrID);
+            }
+            if (o.value.Equals(n.value))
             {
                 return new Boolean() { val = true };
             }
@@ -44,8 +53,31 @@ namespace NParser.Types.Internals
                 return new Boolean() { val = false };
             }
         }
+        [OperatorName(cast = true, name = "!=")]
+        public static Boolean Not(NetLogoObject o, NetLogoObject n)
+        {
+
+            if (!string.IsNullOrEmpty(o.ptrID))
+            {
+                o = sys.Assign(o.ptrID);
+            }
+            if (!string.IsNullOrEmpty(n.ptrID))
+            {
+                n = sys.Assign(n.ptrID);
+            }
+            if (!o.value.Equals(n.value))
+            {
+                return new Boolean() { val = true };
+            }
+            else
+            {
+                return new Boolean() { val = false };
+            }
+
+        }
+
         [OperatorName(cast = true, name = ">")]
-        public static Boolean over(Number o, Number n)
+        public static Boolean Over(Number o, Number n)
         {
             if (o.val > n.val)
             {
@@ -56,9 +88,21 @@ namespace NParser.Types.Internals
                 return new Boolean() { val = false };
             }
         }
+        [OperatorName(cast = true, name = "<")]
+        public static Boolean Under(Number o, Number n)
+        {
+            if (o.val < n.val)
+            {
+                return new Boolean() { val = true };
+            }
+            else
+            {
+                return new Boolean() { val = false };
+            }
+        }
 
         [OperatorName(cast = true, name = "%")]
-        public static Number mod(Number n, Number o)
+        public static Number Mod(Number n, Number o)
         {
 
             return new Number() { val = n.val % o.val };
@@ -66,7 +110,7 @@ namespace NParser.Types.Internals
         }
 
         [OperatorName(cast = false, name = "tick")]
-        public static NetLogoObject tick(NetLogoObject o, NetLogoObject n)
+        public static NetLogoObject Tick(NetLogoObject o, NetLogoObject n)
         {
 
             sys.globals["ticks"].value = ((float)sys.globals["ticks"].value) + 1;
@@ -74,7 +118,7 @@ namespace NParser.Types.Internals
         }
 
         [OperatorName(cast = false, name = "let")]
-        public static NetLogoObject let(NetLogoObject o, NetLogoObject n)
+        public static NetLogoObject Let(NetLogoObject o, NetLogoObject n)
         {
             
             if (o.ptrID != null)
@@ -91,7 +135,7 @@ namespace NParser.Types.Internals
         }
 
         [OperatorName(cast = false, name = "report")]
-        public static NetLogoObject report(NetLogoObject o, NetLogoObject d)
+        public static NetLogoObject Report(NetLogoObject o, NetLogoObject d)
         {
             sys.GetCurrentFrame().ReportValue = o;
             sys.BreakExecution = true;
@@ -99,20 +143,20 @@ namespace NParser.Types.Internals
 
         }
         [OperatorName(name = "get-n",cast = true)]
-        public static NetLogoObject getNeighbours(Number i, Number j)
+        public static NetLogoObject GetNeighbours(Number i, Number j)
         {
-            List<Patch> data = sys.GetNeighbours((int)i.val, (int)j.val);
+            List<MetaAgent> data = sys.GetNeighbours((int)i.val, (int)j.val);
             return new NetLogoObject() { ptrID = "NULLPTR" };
         }
         [OperatorName(name = "show",cast = true)]
-        public static NetLogoObject show(NetLogoObject o, NetLogoObject d)
+        public static NetLogoObject Show(NetLogoObject o, NetLogoObject d)
         {
             Console.WriteLine(o.value);
             return new NetLogoObject() { ptrID = "NULLPTR" };
         }
 
         [OperatorName(cast = false, name = "set")]
-        public static NetLogoObject set(NetLogoObject o, NetLogoObject n)
+        public static NetLogoObject Set(NetLogoObject o, NetLogoObject n)
         {
            
                 if (o.ptrID != null)
@@ -132,22 +176,22 @@ namespace NParser.Types.Internals
 
         }
         [OperatorName(name = "+")]
-        public static Number add(Number n, Number b)
+        public static Number Add(Number n, Number b)
         {
             return new Number() { val = n.val + b.val };
         }
         [OperatorName(name = "/")]
-        public static Number divide(Number n, Number b)
+        public static Number Divide(Number n, Number b)
         {
             return new Number() { val = n.val / b.val };
         }
         [OperatorName(name = "-")]
-        public static Number sub(Number n, Number b)
+        public static Number Sub(Number n, Number b)
         {
             return new Number() { val = n.val - b.val };
         }
         [OperatorName(name = "*")]
-        public static Number order(Number n, Number b)
+        public static Number Order(Number n, Number b)
         {
             return new Number() { val = n.val * b.val };
         }
@@ -185,7 +229,7 @@ namespace NParser.Types.Internals
 
         }
         [OperatorName(name = "setxy")]
-        public static NetLogoObject setxy(Number x, Number y)
+        public static NetLogoObject Setxy(Number x, Number y)
         {
             if (sys.GetCurrentFrame().isAsk)
             {
@@ -213,38 +257,38 @@ namespace NParser.Types.Internals
         {
             o = sys.Assign((string)o.value, true);
            int val =  Performance.PeformanceTracker.StopWithoutWrite((string)o.value);
-            set(n, new Number() { value = val });
+            Set(n, new Number() { value = val });
             return new NetLogoObject() { ptrID = "NULLPTR" };
         }
 
 
         [OperatorName(cast = false,name = "random-xcor")]
         [OperatorName(cast = false, name = "random-ycor")]
-        [OperatorName(cast = false, name = "random")]
-        public static Number random(NetLogoObject o, NetLogoObject n)
+        [OperatorName(cast = false, name = "random",treatAsVal = true)]
+        public static Number Random(NetLogoObject o, NetLogoObject n)
         {
             int x = sys.r.Next(50);
             return new Number() { value = x };
 
         }
         [OperatorName(name = "clear-all")]
-        public static NetLogoObject reset(NetLogoObject o, NetLogoObject n)
+        public static NetLogoObject Reset(NetLogoObject o, NetLogoObject n)
         {
             sys.globals["ticks"].value = 0;
             return new NetLogoObject() { ptrID = "NULLPTR" };
         }
         [OperatorName(name = "forward")]
         [OperatorName(name = "fd")]
-        public static NetLogoObject forward(Number o, NetLogoObject n)
+        public static NetLogoObject Forward(Number o, NetLogoObject n)
         {
 
             if (sys.GetCurrentFrame().isAsk)
             {
                 MetaAgent m = (MetaAgent)sys.Get("Agent");
                 Integer x = new Integer();
-                x.val = (int)(o.val * Math.Sin(((Number)m.properties.GetProperty("rotation")).val));
+                x.val = (int)(o.val * Math.Sin(Utils.MathUtilities.DegToRad(((Number)m.properties.GetProperty("rotation")).val)));
                 Integer y = new Integer();
-                y.val = (int)(o.val * Math.Cos(((Number)m.properties.GetProperty("rotation")).val));
+                y.val = (int)(o.val * Math.Cos(Utils.MathUtilities.DegToRad(((Number)m.properties.GetProperty("rotation")).val)));
                 x.val = m.x + x.val;
                 y.val = m.y + y.val;
                 if ((x.val > 0) && (x.val < 49))
@@ -268,7 +312,7 @@ namespace NParser.Types.Internals
             return new NetLogoObject() { ptrID = "NULLPTR" };
         }
         [OperatorName(name = "rt")]
-        public static NetLogoObject rotate(Number o, NetLogoObject n)
+        public static NetLogoObject Rotate(Number o, NetLogoObject n)
         {
 
             if (sys.GetCurrentFrame().isAsk)

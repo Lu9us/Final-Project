@@ -19,6 +19,7 @@ namespace NParser.Types
         internal Dictionary<string, Type> protectedType { get; set; }
         internal List<string> protectedValue { get; set; }
         internal Dictionary<string, OnPropertyChange> Events { get; set; }
+        public bool valueChanged = false;
         public NetLogoObject GetProperty(string name)
         {
             try
@@ -53,6 +54,7 @@ namespace NParser.Types
                 properties[name] = value;
                 if (Events.ContainsKey(name))
                 { Events[name].Invoke(value); }
+                valueChanged = true;
             }
             catch (Exception e)
             {

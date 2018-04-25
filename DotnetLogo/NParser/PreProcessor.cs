@@ -24,7 +24,7 @@ namespace NParser
         
         //program counter
         int PC = 0;
-
+       
         public bool fileEnd = false;
         public bool skipBadLines = false;
 
@@ -127,13 +127,7 @@ namespace NParser
 
 
                     Console.WriteLine("Parsing failed Exception Details: " + e.ToString());
-                    if (!skipBadLines)
-                    { 
-#if DEBUG
-                        Debugger.Break();
-#endif
-      
-                    }
+                   
                 }
             }
             else if (PC >= data.Length)
@@ -286,9 +280,10 @@ namespace NParser
             string token = "";
             try
             {
-                string[] lineData = StringUtilities.split(delims, this.data[spc]);
+                string[] lineData = StringUtilities.split(delims,line);
 
                 List<FlowControll> fc = new List<FlowControll>();
+                List<Ask> AskData = new List<Ask>();
                 List<string> paramaters = new List<string>();
 
                 bool report = false;
@@ -314,6 +309,12 @@ namespace NParser
                             }
                             fc.Add(fcc);
                         }
+                        if (td.Equals(askKeyword) && stack.Count > 0 && tempPC != tpc)
+                        {
+                            Ask ask = AskDeclarative(this.data[tempPC], tempPC, tempPC - tpc );
+                          
+                            AskData.Add(ask);
+                        }
 
                         if (td == "]")
                         {
@@ -338,7 +339,7 @@ namespace NParser
                 }
 
                 Ask f = new Ask(lines, spc , name) { pcOffset = offset, paramaters = paramaters, Report = report };
-
+                f.askData = AskData;
                 f.flowControls = fc;
 
                 return f;
@@ -348,7 +349,9 @@ namespace NParser
 #if DEBUG
                 Debugger.Break();
 #endif
+                fileEnd = true;
                 throw new RTException("Function parsing failed on line " + tempPC + " with exception " + e.Message);
+               
             }
 
 
@@ -501,7 +504,7 @@ namespace NParser
                     if (!string.IsNullOrWhiteSpace(token))
                     {
 
-                        if (flowControllKeywords.Any(a => token.Equals(a)))
+                        if (flowControllKeywords.Any(a => token.Equals(a)) && tempPC != tPC)
                         {
 
                             FlowControll flow = FlowControl(tempPC, this.data[tempPC]);

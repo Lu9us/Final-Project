@@ -20,11 +20,11 @@ namespace NetMASS
         {
             if (textbox.InvokeRequired)
             {
-                textbox.Invoke(new Action(() => { textbox.Text += value; ; }));
+                textbox.Invoke(new Action(() => { textbox.Text += value; textbox.Refresh(); }));
             }
             else
             {
-                textbox.Text += value;
+                textbox.Text += value; textbox.Refresh();
             }
         }
 
@@ -32,11 +32,11 @@ namespace NetMASS
         {
             if (textbox.InvokeRequired)
             {
-                textbox.Invoke(new Action(() => { textbox.Text += value; ; }));
+                textbox.Invoke(new Action(() => { textbox.Text += value; ; textbox.Refresh(); }));
             }
             else
             {
-                textbox.Text += value;
+                textbox.Text += value; textbox.Refresh();
             }
         }
 

@@ -87,23 +87,28 @@ namespace NetMASS
                 Bitmap img = spriteMap["Tile"];
                 foreach (Patch p in es.sys.patches)
                 {
+                    if (p.properties.valueChanged)
+                    {
+                        Bitmap b = changeColour(img, Color.FromName(((NSString)p.properties.GetProperty("p-color")).val.Replace('\"', ' ').Trim()), "Patch");
+                        colorMap[p.x, p.y] = ((NSString)p.properties.GetProperty("p-color")).val.Replace('\"', ' ');
 
-                    Bitmap b = changeColour(img, Color.FromName(((NSString)p.properties.GetProperty("p-color")).val.Replace('\"', ' ').Trim()), "Patch");
-                    colorMap[p.x, p.y] = ((NSString)p.properties.GetProperty("p-color")).val.Replace('\"', ' ');
-                   
-                    g.DrawImageUnscaled(b, new Point(p.x * img.Width, p.y * img.Height));
+                        g.DrawImageUnscaled(b, new Point(p.x * img.Width, p.y * img.Height));
+
+                    }
 
                 }
                 img = spriteMap["Agent"];
                 foreach (Agent a in es.sys.agents.Values)
                 {
-                    float dx =  img.Width / 2;
-                    float dy =  img.Height/ 2;
-                    Bitmap b = changeColour(img, Color.FromName(((NSString)a.properties.GetProperty("color")).val.Replace('\"', ' ').Trim()), "Agent");
-               
-                    g.DrawImageUnscaled(b, new Point(a.x*img.Width,a.y*img.Height));
-                   
+                        if (a.properties.valueChanged)
+                        {
+                            float dx = img.Width / 2;
+                            float dy = img.Height / 2;
+                            Bitmap b = changeColour(img, Color.FromName(((NSString)a.properties.GetProperty("color")).val.Replace('\"', ' ').Trim()), "Agent");
 
+                            g.DrawImageUnscaled(b, new Point(a.x * img.Width, a.y * img.Height));
+
+                        }
                 }
 
                 if (data != null)
@@ -240,9 +245,10 @@ namespace NetMASS
         }
         private void ThreadRuntime(string input)
         {
+            string text = txtInput.Text;
             while (exeThread)
             {
-                string text = txtInput.Text;
+               
 #if CALLTRACK || ALLTRACK
                 PeformanceTracker.StartStopWatch(text);
 #endif

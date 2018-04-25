@@ -192,7 +192,15 @@ namespace NParser.Runtime
                         //copy construct to not alter original data
                         Dictionary<string, NetLogoObject> param = new Dictionary<string, NetLogoObject>(sys.GetCurrentFrame().param);
                         Dictionary<string, NetLogoObject> vars = sys.GetCurrentFrame().locals;
-                        param.Add("Agent", l[i]);
+                        if (param.ContainsKey("Agent") && sys.GetCurrentFrame().isAsk)
+                        {
+                            param["Agent"] = l[i];
+                        }
+                        else
+                        {
+                            param.Add("Agent", l[i]);
+                        }
+
                         StackFrame ff = new StackFrame(name + "-ask",
                            param, a)
                         { isAsk = true, locals = vars };
@@ -210,15 +218,19 @@ namespace NParser.Runtime
                     Function f = sys.GetCurrentFrame().baseFunction;
                     string line = n.parent.data.Replace('[', ' ');
                     FlowControll fc = f.flowControls.First(a => line.Contains(a.conditionalLine));
-
+                    Dictionary<string, NetLogoObject> param = new Dictionary<string, NetLogoObject>(sys.GetCurrentFrame().param);
+                    Dictionary<string, NetLogoObject> vars = sys.GetCurrentFrame().locals;
                     if (bool.Parse(n.left.data))
                     {
+                      
                         StackFrame sf =
                             new StackFrame(f.name + "|" + fc.conditionalLine + "|" + FlowControll.JumpType.Succes,
-                                sys.GetCurrentFrame().param, fc.JumpTable[FlowControll.JumpType.Succes]);
+                                param, fc.JumpTable[FlowControll.JumpType.Succes]);
                         sf.anonymousFunction = false;
                         sf.flowControl = true;
                         sf.isAsk = sys.GetCurrentFrame().isAsk;
+                        sf.locals = vars;
+                       
                         ExecFrame(sf, fc.JumpTable[FlowControll.JumpType.Succes], n);
                         sys.GetCurrentFrame().pc += fc.GetTotalJump();
                     }
@@ -226,12 +238,13 @@ namespace NParser.Runtime
                     {
                         StackFrame sf =
                              new StackFrame(f.name + "|" + fc.conditionalLine + "|" + FlowControll.JumpType.Fail,
-                                 sys.GetCurrentFrame().param, fc.JumpTable[FlowControll.JumpType.Fail]);
+                               param, fc.JumpTable[FlowControll.JumpType.Fail]);
                         sf.anonymousFunction = false;
                         sf.flowControl = true;
                         sf.isAsk = sys.GetCurrentFrame().isAsk;
+                        sf.locals = vars;
+
                         ExecFrame(sf, fc.JumpTable[FlowControll.JumpType.Fail], n);
-                        sf.anonymousFunction = false;
                         sys.GetCurrentFrame().pc += fc.GetTotalJump();
                     }
                     else
