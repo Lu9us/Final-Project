@@ -465,7 +465,12 @@ namespace NParser
 
 
         }
-
+        /// <summary>
+        /// create a flow controll structure starting at tpc using line
+        /// </summary>
+        /// <param name="tPC"></param>
+        /// <param name="line"></param>
+        /// <returns></returns>
         public FlowControll FlowControl(int tPC,string line)
         {
             line = line.Trim();

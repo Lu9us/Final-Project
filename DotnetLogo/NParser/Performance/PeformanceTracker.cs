@@ -35,6 +35,7 @@ namespace NParser.Performance
             watchList = new Dictionary<string, Stopwatch>();
             writeQueue = new Utils.Queue<string>();
             writerThread = new Thread(Write);
+            writerThread.IsBackground = true;
            
             trackingState = TrackingState.None;
            

@@ -71,5 +71,5 @@ end
 
 
 
-; Copyright 2003 Uri Wilensky.
-; See Info tab for full copyright and license.
+; Modified from a script developed by: Uri Wilensky.
+

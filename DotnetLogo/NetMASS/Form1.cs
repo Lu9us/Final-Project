@@ -305,8 +305,8 @@ namespace NetMASS
                     paramt = txtInput.Text.Split(' ')[1];
                     if (paramt == "-forever")
                     {
-                        t = new Thread(() => { ThreadRuntime(input); }) {Name  = "Runtime Thread" }; 
-                           
+                        t = new Thread(() => { ThreadRuntime(input); }) {Name  = "Runtime Thread" };
+                        t.IsBackground = true;   
                         exeThread = true;
 
                         t.Start();
